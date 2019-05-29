@@ -42,7 +42,9 @@ const (
 )
 
 type newLoggerFunc func() LoggerInterface
-type formaterFunc func(logLevel int, msg string, v ...interface{}) string
+
+// FormaterFunc 自定义文件格式构造方法
+type FormaterFunc func(logLevel int, msg string, v ...interface{}) string
 
 // LoggerInterface 各模式处理类需要实现的接口
 type LoggerInterface interface {
@@ -80,7 +82,7 @@ type Logger struct {
 	signalChan          chan string
 	wg                  sync.WaitGroup
 	outputs             []*nameLogger
-	formatter           formaterFunc // 可以自定义日志格式化方法
+	formatter           FormaterFunc // 可以自定义日志格式化方法
 }
 
 const defaultAsyncMsgLen = 1e3
@@ -189,7 +191,7 @@ func (lg *Logger) SetLevel(l int) {
 }
 
 // SetFormatter 设置自定义的格式化方法
-func (lg *Logger) SetFormatter(formatter formaterFunc, force ...bool) error {
+func (lg *Logger) SetFormatter(formatter FormaterFunc, force ...bool) error {
 	lg.lock.Lock()
 	defer lg.lock.Unlock()
 	isForce := append(force, false)[0]

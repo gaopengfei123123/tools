@@ -5,6 +5,18 @@ import (
 	"testing"
 )
 
+func TestFormater(t *testing.T) {
+	var formatter FormaterFunc
+	formatter = func(logLevel int, msg string, v ...interface{}) string {
+		return fmt.Sprintf("LogFormatter -> logLevel: %d, msg: %s, other: %v \n", logLevel, msg, v)
+	}
+
+	logger := NewLogger()
+	logger.SetFormatter(formatter)
+
+	logger.Info("这是一条测试消息", 233, 244, 88)
+}
+
 func TestLog(t *testing.T) {
 	levelPool := []int{
 		LevelEmergency,
