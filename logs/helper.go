@@ -66,7 +66,7 @@ func formatTimeHeader(when time.Time) ([]byte, int, int) {
 	h, mi, s := when.Clock()
 	// ns := when.Nanosecond() / 1000000
 
-	var buf [24]byte
+	var buf [20]byte
 	buf[0] = y1[y/1000%10]
 	buf[1] = y2[y/100]
 	buf[2] = y3[y-y/100*100]

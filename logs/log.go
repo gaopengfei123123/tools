@@ -89,7 +89,7 @@ const defaultAsyncMsgLen = 1e3
 
 type nameLogger struct {
 	LoggerInterface
-	name string
+	Name string
 }
 
 type logMsg struct {
@@ -209,10 +209,11 @@ func (lg *Logger) SetFormatter(formatter FormaterFunc, force ...bool) error {
 
 // 配置日志适配器
 func (lg *Logger) setLogger(adapterName string, configs ...string) error {
+	// fmt.Printf("设置适配器: %s, config: %v \n", adapterName, configs)
 	// 设置默认值
 	config := append(configs, "{}")[0]
 	for _, l := range lg.outputs {
-		if l.name == adapterName {
+		if l.Name == adapterName {
 			return fmt.Errorf("logs: 重复设置适配器 %q , 只能配置一次", adapterName)
 		}
 	}
@@ -228,7 +229,7 @@ func (lg *Logger) setLogger(adapterName string, configs ...string) error {
 		fmt.Fprintln(os.Stderr, "logs: Logger.SetLogger: "+err.Error())
 		return err
 	}
-	lg.outputs = append(lg.outputs, &nameLogger{name: adapterName, LoggerInterface: adapter})
+	lg.outputs = append(lg.outputs, &nameLogger{Name: adapterName, LoggerInterface: adapter})
 	return nil
 }
 
@@ -236,6 +237,8 @@ func (lg *Logger) setLogger(adapterName string, configs ...string) error {
 func (lg *Logger) SetLogger(adapterName string, config ...string) error {
 	lg.lock.Lock()
 	defer lg.lock.Unlock()
+
+	// fmt.Printf("SetLogger: %s, config: %v \n", adapterName, config)
 
 	if !lg.init {
 		lg.outputs = []*nameLogger{}
@@ -251,7 +254,7 @@ func (lg *Logger) DelLogger(adapterName string) error {
 
 	outputs := []*nameLogger{}
 	for _, logger := range lg.outputs {
-		if logger.name == adapterName {
+		if logger.Name == adapterName {
 			logger.Destroy()
 		} else {
 			outputs = append(outputs, logger)
@@ -266,10 +269,12 @@ func (lg *Logger) DelLogger(adapterName string) error {
 }
 
 func (lg *Logger) writeToLoggers(when time.Time, msg string, level int) {
+	// fmt.Printf("writeToLoggers: %s, outputs: %v \n", msg, lg.outputs)
 	for _, l := range lg.outputs {
+		// fmt.Printf("in outputs: %s \n", l.Name)
 		err := l.WriteMsg(when, msg, level)
 		if err != nil {
-			fmt.Fprintf(os.Stdout, "logs: 写入 %v 出错, error: %v \n", l.name, err)
+			fmt.Fprintf(os.Stdout, "logs: 写入 %v 出错, error: %v \n", l.Name, err)
 		}
 	}
 }
@@ -322,6 +327,8 @@ func (lg *Logger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	}
 
 	when := time.Now()
+
+	// fmt.Printf("writeMsg: %s \n", msg)
 
 	if lg.asynchronous {
 		lm := logMsgPool.Get().(*logMsg)

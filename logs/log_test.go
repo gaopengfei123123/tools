@@ -28,14 +28,14 @@ func TestLog(t *testing.T) {
 		LevelInformational,
 		LevelDebug,
 	}
+	logger := NewLogger()
 	for _, level := range levelPool {
-		callAll(level, "测试消息")
+		callAll(level, "测试消息", logger)
 	}
 
 }
 
-func callAll(level int, msg string) {
-	logger := NewLogger()
+func callAll(level int, msg string, logger *Logger) {
 	logger.SetLevel(level)
 	fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>level: %d \n", level)
 
