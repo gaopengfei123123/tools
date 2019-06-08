@@ -57,7 +57,7 @@ type LoggerInterface interface {
 var adapters = make(map[string]newLoggerFunc)
 var levelPrefix = [LevelDebug + 1]string{"[M] ", "[A] ", "[C] ", "[E] ", "[W] ", "[N] ", "[I] ", "[D] "}
 
-// Register 注册处理日志的实体
+// Register 注册处理日志的实体, 只是注册,并没有放在logger里面的outputs里面
 func Register(name string, log newLoggerFunc) {
 	if log == nil {
 		panic("logs: 需要一个日志处理实体")

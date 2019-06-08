@@ -61,6 +61,7 @@ func (lg *logWriter) println(when time.Time, msg string) {
 	lg.writer.Write(append(append(h, msg...), '\n'))
 }
 
+// yyyy-mm-dd hh:ii:ss
 func formatTimeHeader(when time.Time) ([]byte, int, int) {
 	y, mo, d := when.Date()
 	h, mi, s := when.Clock()
@@ -96,4 +97,22 @@ func formatTimeHeader(when time.Time) ([]byte, int, int) {
 	// buf[23] = ' '
 
 	return buf[0:], d, h
+}
+
+// yyyy-mm-dd
+func formatDateHeader(when time.Time) (res []byte, year, month, day string) {
+	y, mo, d := when.Date()
+
+	var buf [10]byte
+	buf[0] = y1[y/1000%10]
+	buf[1] = y2[y/100]
+	buf[2] = y3[y-y/100*100]
+	buf[3] = y4[y-y/100*100]
+	buf[4] = '-'
+	buf[5] = mo1[mo-1]
+	buf[6] = mo2[mo-1]
+	buf[7] = '-'
+	buf[8] = d1[d-1]
+	buf[9] = d2[d-1]
+	return buf[0:], string(buf[0:4]), string(buf[5:7]), string(buf[8:])
 }
