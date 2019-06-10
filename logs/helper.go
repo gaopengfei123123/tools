@@ -1,7 +1,9 @@
 package logs
 
 import (
+	"fmt"
 	"io"
+	"io/ioutil"
 	"sync"
 	"time"
 )
@@ -115,4 +117,22 @@ func formatDateHeader(when time.Time) (res []byte, year, month, day string) {
 	buf[8] = d1[d-1]
 	buf[9] = d2[d-1]
 	return buf[0:], string(buf[0:4]), string(buf[5:7]), string(buf[8:])
+}
+
+// 获取指定目录下的文件列表
+func listFile(myfolder string) []string {
+	fileList := []string{}
+	var fileName string
+
+	files, _ := ioutil.ReadDir(myfolder)
+	for _, file := range files {
+		if file.IsDir() {
+			dirFile := listFile(myfolder + "/" + file.Name())
+			fileList = append(fileList, dirFile...)
+		} else {
+			fileName = fmt.Sprintln(myfolder + "/" + file.Name())
+			fileList = append(fileList, fileName)
+		}
+	}
+	return fileList
 }

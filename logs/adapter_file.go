@@ -110,19 +110,47 @@ func (fs *fileStruct) CreateFile() error {
 		return err
 	}
 
-	fd, err := os.OpenFile(fs.Filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.FileMode(perm))
+	filename := fs.getFileName()
+
+	// 存在相同文件名的时候, 将更新fileIndex, 不然重启后日志会覆盖老数据
+	nameLen := len(filename)
+	fileList := listFile(dirpath)
+	for _, name := range fileList {
+		l := len(name)
+		if l >= nameLen && name[0:nameLen] == filename {
+			fs.FileIndex++
+		}
+	}
+	// 移除最开始的计数
+	if fs.FileIndex >= 1 {
+		fs.FileIndex--
+	}
+
+	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, os.FileMode(perm))
 	if err != nil {
 		return err
 	}
 	fs.Fd = fd
+
+	// 获取打开文件尺寸
+	info, _ := fs.Fd.Stat()
+	size := info.Size()
+	strInt64 := strconv.FormatInt(size, 10)
+	fs.FileSize, _ = strconv.Atoi(strInt64)
+
 	return nil
+}
+
+func (fs *fileStruct) getFileName() string {
+	_, y2, m2, d2 := formatDateHeader(fs.Date)
+	filename := fmt.Sprintf("%s%s.%s%s%s", fs.fileNameOnly, fs.suffix, y2, m2, d2)
+	return (fs.filePath + filename)
 }
 
 // FlashFile 根据文件现在状态备份,并重新生成个文件句柄
 func (fs *fileStruct) FlashFile() error {
 	oldName := fs.Fd.Name()
-	_, y2, m2, d2 := formatDateHeader(fs.Date)
-	filename := fmt.Sprintf("%s.%s%s%s", oldName, y2, m2, d2)
+	filename := fs.getFileName()
 	// fmt.Printf("fileName: %s  %v \n", filename, fs.FileIndex)
 	if fs.FileIndex > 0 {
 		filename = fmt.Sprintf("%s.%d", filename, fs.FileIndex)
