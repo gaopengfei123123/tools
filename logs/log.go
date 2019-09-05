@@ -55,7 +55,7 @@ type LoggerInterface interface {
 }
 
 var adapters = make(map[string]newLoggerFunc)
-var levelPrefix = [LevelDebug + 1]string{"[M] ", "[A] ", "[C] ", "[E] ", "[W] ", "[N] ", "[I] ", "[D] "}
+var levelPrefix = [LevelDebug + 1]string{"[EMERGENCY] ", "[ALERT] ", "[Critical] ", "[ERROR] ", "[WARNING] ", "[NOTICE] ", "[INFO] ", "[DEBUG] "}
 
 // Register 注册处理日志的实体, 只是注册,并没有放在logger里面的outputs里面
 func Register(name string, log newLoggerFunc) {
@@ -379,12 +379,22 @@ func (lg *Logger) Close() {
 	close(lg.signalChan)
 }
 
-// Emergency 紧急
+// Emergency 紧急 (自动开代码追踪)
 func (lg *Logger) Emergency(format string, v ...interface{}) {
 	if LevelEmergency > lg.level {
 		return
 	}
-	lg.writeMsg(LevelEmergency, format, v...)
+	needReset := false
+	if lg.enableFuncCallDepth == false {
+		lg.enableFuncCallDepth = true
+		needReset = true
+	}
+
+	lg.writeMsg(LevelDebug, format, v...)
+
+	if needReset {
+		lg.enableFuncCallDepth = false
+	}
 }
 
 // Alert 警告
@@ -395,20 +405,42 @@ func (lg *Logger) Alert(format string, v ...interface{}) {
 	lg.writeMsg(LevelAlert, format, v...)
 }
 
-// Critical 重要
+// Critical 重要(自动开代码追踪)
 func (lg *Logger) Critical(format string, v ...interface{}) {
 	if LevelCritical > lg.level {
 		return
 	}
-	lg.writeMsg(LevelCritical, format, v...)
+
+	needReset := false
+	if lg.enableFuncCallDepth == false {
+		lg.enableFuncCallDepth = true
+		needReset = true
+	}
+
+	lg.writeMsg(LevelDebug, format, v...)
+
+	if needReset {
+		lg.enableFuncCallDepth = false
+	}
 }
 
-// Error 错误
+// Error 错误(自动开代码追踪)
 func (lg *Logger) Error(format string, v ...interface{}) {
 	if LevelError > lg.level {
 		return
 	}
-	lg.writeMsg(LevelError, format, v...)
+
+	needReset := false
+	if lg.enableFuncCallDepth == false {
+		lg.enableFuncCallDepth = true
+		needReset = true
+	}
+
+	lg.writeMsg(LevelDebug, format, v...)
+
+	if needReset {
+		lg.enableFuncCallDepth = false
+	}
 }
 
 // Warning 警告
