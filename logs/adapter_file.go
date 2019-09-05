@@ -58,6 +58,7 @@ type fileLogWriter struct {
 // TODO: 修复一下读写不安全的问题
 type filePool struct {
 	pool map[string]*fileStruct
+	sync.Mutex
 }
 
 type fileStruct struct {
@@ -203,7 +204,9 @@ func (fp *filePool) Set(fs *fileStruct) {
 	if ok {
 		return
 	}
+	fp.Lock()
 	fp.pool[filename] = fs
+	fp.Unlock()
 	return
 }
 
@@ -327,8 +330,9 @@ func (w *fileLogWriter) WriteMsg(when time.Time, msg string, level int) error {
 }
 
 func (w *fileLogWriter) Destroy() {
-	fp.Del(w.Filename)
+	// 销毁暂时不销毁, 因为所有的同名file都是公用的一个句柄
+	// fp.Del(w.Filename)
 }
 func (w *fileLogWriter) Flush() {
-
+	fp.Del(w.Filename)
 }

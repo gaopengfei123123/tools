@@ -1,9 +1,12 @@
 package logs
 
 import (
+	"crypto/md5"
 	"fmt"
+	"github.com/satori/go.uuid"
 	"io"
 	"io/ioutil"
+	"strings"
 	"sync"
 	"time"
 )
@@ -135,4 +138,40 @@ func listFile(myfolder string) []string {
 		}
 	}
 	return fileList
+}
+
+// 格式化打印数据
+func interfaceToStr(f interface{}, v ...interface{}) (string, []interface{}) {
+	var msg string
+	switch f.(type) {
+	case string:
+		msg = f.(string)
+		// v 的第一个参数留作category备用
+		if len(v) <= 1 {
+			return msg, v
+		}
+		if strings.Contains(msg, "%") && !strings.Contains(msg, "%%") {
+			//format string
+		} else {
+			//do not contain format char
+			msg += strings.Repeat(" %v", len(v))
+		}
+	default:
+		msg = fmt.Sprint(f)
+		if len(v) <= 1 {
+			return msg, v
+		}
+		msg += strings.Repeat(" %v", len(v))
+	}
+	return msg, v
+}
+
+// GenerageUniqueID 获取uniqueid
+func GenerageUniqueID(src string) (uid, salt string) {
+	uuid, _ := uuid.NewV4()
+	salt = uuid.String()[:32]
+	h := md5.New()
+	h.Write([]byte(src + salt))
+	uid = fmt.Sprintf("%x", h.Sum(nil))
+	return
 }
