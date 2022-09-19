@@ -4,3 +4,5 @@ npm-debug.log
 *.log
 *.json
 *.log*
+.idea
+go.sum
