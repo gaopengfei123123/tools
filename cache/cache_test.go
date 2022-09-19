@@ -37,8 +37,8 @@ func TestDecode2(t *testing.T) {
 
 func getRedisClient() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:         "172.17.33.38:6379",
-		Password:     "Oneway2015",
+		Addr:         "",
+		Password:     "",
 		MinIdleConns: 5,
 		PoolSize:     20,
 	})
