@@ -40,14 +40,22 @@ type ResponseBody struct {
 	Err    error         // 函数在 callBack 里调用时的错误
 }
 
+// GetResult 将返回结果以反射的方式赋值给传入参数
+func (resp *ResponseBody) GetResult(returnItems ...interface{}) error {
+	if resp.Err != nil {
+		return resp.Err
+	}
+	return InterfaceToResult(resp.Result, returnItems...)
+}
+
 // BatchExec 并发执行, 需限制总的并发数量
 func BatchExec(task CallTask) (resultList []ResponseBody, err error) {
 	if len(task.TaskList) == 0 {
 		return
 	}
 
-	if len(task.TaskList) > 200 {
-		err = fmt.Errorf("go coroutines limit 200")
+	if len(task.TaskList) > 500 {
+		err = fmt.Errorf("go coroutines limit 500")
 		return
 	}
 
@@ -120,20 +128,15 @@ LOOP:
 	return resultList, nil
 }
 
-// SyncBatchExec 同步执行, 需限制总的并发数量
+// SyncBatchExec 同步执行, 用于不方便并发执行的业务
 func SyncBatchExec(task CallTask) (resultList []ResponseBody, err error) {
 	if len(task.TaskList) == 0 {
 		return
 	}
 
-	if len(task.TaskList) > 200 {
-		err = fmt.Errorf("go coroutines limit 200")
-		return
-	}
-
-	// 设置个默认超时时间
+	// 设置个默认超时时间, 串行执行
 	if task.MaxTime == 0 {
-		task.MaxTime = time.Second * 10
+		task.MaxTime = time.Second * 600
 	}
 
 	// 创建阻塞通道, 为了计算超时时间

@@ -69,10 +69,46 @@ func (c *RedisClient) Exist(k string) bool {
 
 func (c *RedisClient) CacheFunc(funcName interface{}, params ...interface{}) *CallFuncBody {
 	logs.Info("CacheFunc")
-	bd := &CallFuncBody{
+	cb := &CallFuncBody{
 		FuncName: funcName,
 		Params:   params,
 		cache:    c,
 	}
-	return bd
+
+	cacheKey, err := cb.GetCacheKey()
+	logs.Trace("cacheKey: %v, err: %v", cacheKey, err)
+	if err != nil {
+		cb.Err = err
+		return cb
+	}
+
+	cachedRes := make([]interface{}, 0)
+	err = cb.cache.Get(cacheKey, &cachedRes)
+
+	logs.Trace("getCacheResult: %#+v, err: %v", cachedRes, err)
+	if err != nil {
+		goto STEP1
+	}
+
+	cb.Result = cachedRes
+	return cb
+
+STEP1:
+	res, err := CallFunc(*cb)
+	if err != nil {
+		cb.Err = err
+		return cb
+	}
+
+	// 添加
+	cb.Result = res
+
+	// 生成新的缓存
+	err = cb.cache.Save(cacheKey, res)
+	if err != nil {
+		cb.Err = err
+		return cb
+	}
+
+	return cb
 }

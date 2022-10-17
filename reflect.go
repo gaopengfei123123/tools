@@ -88,3 +88,46 @@ func getStructField(input interface{}, key string) (value interface{}, err error
 
 	return
 }
+
+// 分解单个参数, 将值动态的赋给索引, 如果类型不一致, 则会报错
+func resultUnmarshal(src interface{}, dst interface{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("字段赋值错误: 源字段类型:%v, 赋值字段是%v", reflect.ValueOf(dst).Elem().Type(), reflect.ValueOf(src).Elem().Type())
+			return
+		}
+	}()
+
+	dstRv := reflect.ValueOf(dst)
+	if dstRv.Kind() != reflect.Pointer || dstRv.IsNil() {
+		return fmt.Errorf("params[%v]不是一个引用类型参数", dst)
+	}
+	// 源是空的时候不做处理
+	if src == nil {
+		return nil
+	}
+
+	// 利用反射给字段赋值
+	srcRv := reflect.ValueOf(src)
+	//logs.Trace("rv dst: %v, src: %v", dstRv.Elem().Type(), srcRv.Type())
+	dstRv.Elem().Set(srcRv)
+	return nil
+}
+
+func InterfaceToResult(res interface{}, returnItems ...interface{}) error {
+	resultList := res.([]interface{})
+	allowIndex := len(resultList)
+	//logs.Trace("InterfaceToResult resultList: %#+v, len: %v", resultList, allowIndex)
+
+	for i := 0; i < len(returnItems); i++ {
+		if i >= allowIndex {
+			continue
+		}
+		//logs.Trace("i: %v src: %v, dst: %v", i, resultList[i], returnItems[i])
+		err := resultUnmarshal(resultList[i], returnItems[i])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

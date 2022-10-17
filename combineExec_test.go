@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// 批量执行调用示例
+// 调用示例
 func TestDemo(t *testing.T) {
 	t.Log("start")
 	func1 := CallBody{
@@ -44,6 +44,21 @@ func TestDemo(t *testing.T) {
 	}
 	res, err := BatchExec(batchList)
 	logs.Debug("output result:\nresult: %v\nerr: %s", res, err)
+
+	for i := 0; i < len(res); i++ {
+		curResult := res[i]
+		if i < 2 {
+			// DemoFunc 的返回值
+			var msg string
+			execErr := curResult.GetResult(&msg)
+			logs.Info("exec index: %d, execErr: %v res: %#+v", curResult.Index, execErr, msg)
+		} else {
+			var res map[string]string
+			var err error
+			execErr := curResult.GetResult(&res, &err)
+			logs.Info("exec index: %d, execErr: %v res: %#+v, %#+v", curResult.Index, execErr, res, err)
+		}
+	}
 
 	t.Log("end")
 }

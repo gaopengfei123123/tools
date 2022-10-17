@@ -6,11 +6,11 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
-	"github.com/astaxie/beego/logs"
 	"github.com/pkg/errors"
 	"reflect"
 	"runtime"
 	"strings"
+	"tools"
 )
 
 // Encode 进行 golang 的序列化
@@ -34,31 +34,18 @@ func Decode(v []byte, target interface{}) error {
 // CallFuncBody 调用函数的结构体
 type CallFuncBody struct {
 	cache    CommonDrive
-	FuncName interface{}
+	FuncName interface{} // 这里存放函数实体
 	Params   []interface{}
 	Result   []interface{}
+	Err      error
 }
 
 func (cb *CallFuncBody) GetResult(returnItems ...interface{}) error {
-	cacheKey, err := cb.GetCacheKey()
-	logs.Info("cacheKey: %v, err: %v", cacheKey, err)
-	if err != nil {
-		return err
+	if cb.Err != nil {
+		return cb.Err
 	}
 
-	cachedRes := make([]interface{}, 0)
-	err = cb.cache.Get(cacheKey, &cachedRes)
-
-	logs.Info("getCache: %v", cachedRes)
-	if err != nil {
-		goto STEP1
-	}
-
-	// 这里是不走缓存, 直接返回值
-STEP1:
-	res, err := CallFunc(*cb)
-	logs.Info("res: %v, err: %v", res, err)
-	return nil
+	return tools.InterfaceToResult(cb.Result, returnItems...)
 }
 
 func (cb *CallFuncBody) GetCacheKey() (string, error) {

@@ -72,17 +72,18 @@ func TestLoadRedisClient(t *testing.T) {
 	t.Logf("method:Exist  key: %v exist: %v", key1, res)
 }
 
+// 缓存方法示例
 func TestRedisClient_CacheFunc(t *testing.T) {
 	res, err := Demo("no cache message")
 	t.Logf("no cache msg: %v, err: %v", res, err)
 
 	redisClient := getRedisClient()
-	sign := "cache_message"
+	sign := "cache_message_2"
 
 	var errMsg error
 	var funcRes string
 	err = LoadRedisClient(redisClient).CacheFunc(Demo, sign).GetResult(&funcRes, &errMsg)
-	t.Logf("method: CacheFunc err: %v", err)
+	t.Logf("method: CacheFunc err: %v, result: %v, funcErr: %v", err, funcRes, errMsg)
 }
 
 func Demo(msg string) (string, error) {

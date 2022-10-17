@@ -22,3 +22,11 @@ func TestArrayChunk(t *testing.T) {
 	t.Logf("%v", ArrayChunkStr(arr, 2))
 	t.Logf("%v", ArrayChunkStr(arr, 6))
 }
+
+func TestArrayChunk2(t *testing.T) {
+	arr := []int32{
+		1, 2, 3, 4, 5,
+	}
+	t.Logf("%v", ArrayChunkInt32(arr, 2))
+	t.Logf("%v", ArrayChunkInt32(arr, 6))
+}
