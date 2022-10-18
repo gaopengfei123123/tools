@@ -114,8 +114,8 @@ func resultUnmarshal(src interface{}, dst interface{}) (err error) {
 	return nil
 }
 
-func InterfaceToResult(res interface{}, returnItems ...interface{}) error {
-	resultList := res.([]interface{})
+// InterfaceToResult 将interface 里面的字段赋值给后面各种变量
+func InterfaceToResult(resultList []interface{}, returnItems ...interface{}) error {
 	allowIndex := len(resultList)
 	//logs.Trace("InterfaceToResult resultList: %#+v, len: %v", resultList, allowIndex)
 
