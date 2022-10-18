@@ -3,6 +3,7 @@ package cache
 import (
 	"github.com/astaxie/beego/logs"
 	"github.com/go-redis/redis/v8"
+	"sync"
 	"time"
 )
 
@@ -12,29 +13,51 @@ import (
 */
 
 type RedisClient struct {
-	client *redis.Client
+	client        *redis.Client
+	ExpireMap     sync.Map
+	DefaultExpire time.Duration
 }
 
 //var redisClient *RedisClient
 
 // LoadRedisClient 获取 Redis 相关的缓存器
-func LoadRedisClient(c *redis.Client) CommonDrive {
+func LoadRedisClient(c *redis.Client, defaultExpire ...time.Duration) CommonDrive {
 	client := &RedisClient{}
 	client.client = c
+
+	// 设置默认时长
+	if len(defaultExpire) > 0 {
+		client.DefaultExpire = defaultExpire[0]
+	} else {
+		client.DefaultExpire = time.Second * 3600
+	}
+
 	return client
 }
 
+// GetExpire 获取配置的缓存时长
 func (c *RedisClient) GetExpire(k string) time.Duration {
-	return time.Second * 180
+	exp, ok := c.ExpireMap.Load(k)
+	if ok && exp != nil {
+		return exp.(time.Duration)
+	}
+
+	// 如果不设置就默认缓存 1小时
+	return time.Second * 3600
 }
 
-func (c *RedisClient) Save(k string, v interface{}) error {
+// SetExpire 设置单个函数的缓存时长
+func (c *RedisClient) SetExpire(k string, expire time.Duration) CommonDrive {
+	c.ExpireMap.Store(k, expire)
+	return c
+}
+
+func (c *RedisClient) Save(k string, v interface{}, expire time.Duration) error {
 	logs.Info("save")
 	b, err := Encode(v)
 	if err != nil {
 		return err
 	}
-	expire := c.GetExpire(k)
 	err = c.client.Set(c.client.Context(), k, string(b), expire).Err()
 	return err
 }
@@ -75,7 +98,7 @@ func (c *RedisClient) CacheFunc(funcName interface{}, params ...interface{}) *Ca
 		cache:    c,
 	}
 
-	cacheKey, err := cb.GetCacheKey()
+	cacheKey, funcCacheKey, err := cb.GetCacheKey()
 	logs.Trace("cacheKey: %v, err: %v", cacheKey, err)
 	if err != nil {
 		cb.Err = err
@@ -104,7 +127,7 @@ STEP1:
 	cb.Result = res
 
 	// 生成新的缓存
-	err = cb.cache.Save(cacheKey, res)
+	err = cb.cache.Save(cacheKey, res, c.GetExpire(funcCacheKey))
 	if err != nil {
 		cb.Err = err
 		return cb

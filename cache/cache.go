@@ -48,14 +48,15 @@ func (cb *CallFuncBody) GetResult(returnItems ...interface{}) error {
 	return tools.InterfaceToResult(cb.Result, returnItems...)
 }
 
-func (cb *CallFuncBody) GetCacheKey() (string, error) {
+func (cb *CallFuncBody) GetCacheKey() (key string, funcName string, err error) {
 	paramsStr := fmt.Sprintf("%v", cb.Params)
 	h := md5.New()
 	h.Write([]byte(paramsStr))
 	paramsStr = hex.EncodeToString(h.Sum(nil))
 	//logs.Info("%v", GetFuncName(cb.FuncName))
-	key := fmt.Sprintf("CacheFuncKey:%s:%v", GetFuncName(cb.FuncName), paramsStr)
-	return key, nil
+	funcName = GetFuncName(cb.FuncName)
+	key = fmt.Sprintf("CacheFuncKey:%s:%v", GetFuncName(cb.FuncName), paramsStr)
+	return
 }
 
 // GetFuncName 这里取函数最后的名字

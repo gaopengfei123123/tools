@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"github.com/astaxie/beego/logs"
 	"github.com/go-redis/redis/v8"
 	"testing"
 	"time"
@@ -47,14 +48,14 @@ func getRedisClient() *redis.Client {
 func TestLoadRedisClient(t *testing.T) {
 	redisClient := getRedisClient()
 	key1 := "TestLoadRedisClient"
-	err := LoadRedisClient(redisClient).Save(key1, "xxx")
+	err := LoadRedisClient(redisClient).Save(key1, "xxx", time.Second*10)
 	t.Logf("err: %v", err)
 
 	info := map[string]string{
 		"name":    "GPF",
 		"website": "https://blog.justwe.site",
 	}
-	err = LoadRedisClient(redisClient).Save("TestLoadRedisClientInfo", info)
+	err = LoadRedisClient(redisClient).Save("TestLoadRedisClientInfo", info, time.Second*10)
 	t.Logf("method:Save err: %v", err)
 
 	// 从缓存中获取
@@ -74,20 +75,40 @@ func TestLoadRedisClient(t *testing.T) {
 
 // 缓存方法示例
 func TestRedisClient_CacheFunc(t *testing.T) {
-	res, err := Demo("no cache message")
-	t.Logf("no cache msg: %v, err: %v", res, err)
-
 	redisClient := getRedisClient()
-	sign := "cache_message_2"
+	sign := "cache_message2"
+
+	// 初始化缓存工具
+	cache := LoadRedisClient(redisClient)
+	// 设置 Demo函数结果缓存时间
+	cache.SetExpire(GetFuncName(Demo), time.Second*180)
 
 	for i := 0; i < 5; i++ {
 		var errMsg error
 		var funcRes string
-		err = LoadRedisClient(redisClient).CacheFunc(Demo, sign).GetResult(&funcRes, &errMsg)
+		err := cache.CacheFunc(Demo, sign).GetResult(&funcRes, &errMsg)
 		t.Logf("method: CacheFunc err: %v, result: %v, funcErr: %v", err, funcRes, errMsg)
-
 		time.Sleep(time.Second)
 	}
+}
+
+// 注册多个缓存方法, 每个函数缓存的时长不一样
+func TestCallFuncBody_GetResult(t *testing.T) {
+	cache := LoadRedisClient(getRedisClient())
+	cache.SetExpire(GetFuncName(Demo), time.Second*180)
+	cache.SetExpire(GetFuncName(Demo2), time.Second*3600)
+
+	var resultMsg string
+	cache.CacheFunc(Demo, "params xxx").GetResult(&resultMsg)
+	logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo)), resultMsg)
+
+	// TODO 这个有问题, map, 切片, 对象等传址的参数不能很好的识别
+	var mp map[string]string
+	tmp := map[string]string{
+		"Name": "GPF",
+	}
+	cache.CacheFunc(Demo2, tmp).GetResult(&mp)
+	logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo2)), mp)
 }
 
 func Demo(msg string) (string, error) {
@@ -95,4 +116,12 @@ func Demo(msg string) (string, error) {
 	tt := t.Format("06-01-02 15:04:05")
 	res := fmt.Sprintf("message: %s, time: %s", msg, tt)
 	return res, nil
+}
+
+func Demo2(mp map[string]string) (map[string]string, error) {
+	t := time.Now()
+	tt := t.Format("06-01-02 15:04:05")
+	res := fmt.Sprintf("map: %s, time: %s", mp, tt)
+	mp["timer"] = res
+	return mp, nil
 }
