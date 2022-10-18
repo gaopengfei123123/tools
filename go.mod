@@ -1,4 +1,4 @@
-module tools
+module github.com/gaopengfei123123/tools
 
 go 1.19
 
