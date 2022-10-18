@@ -80,10 +80,14 @@ func TestRedisClient_CacheFunc(t *testing.T) {
 	redisClient := getRedisClient()
 	sign := "cache_message_2"
 
-	var errMsg error
-	var funcRes string
-	err = LoadRedisClient(redisClient).CacheFunc(Demo, sign).GetResult(&funcRes, &errMsg)
-	t.Logf("method: CacheFunc err: %v, result: %v, funcErr: %v", err, funcRes, errMsg)
+	for i := 0; i < 5; i++ {
+		var errMsg error
+		var funcRes string
+		err = LoadRedisClient(redisClient).CacheFunc(Demo, sign).GetResult(&funcRes, &errMsg)
+		t.Logf("method: CacheFunc err: %v, result: %v, funcErr: %v", err, funcRes, errMsg)
+
+		time.Sleep(time.Second)
+	}
 }
 
 func Demo(msg string) (string, error) {

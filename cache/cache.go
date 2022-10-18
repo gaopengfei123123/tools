@@ -6,11 +6,11 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
+	"github.com/gaopengfei123123/tools"
 	"github.com/pkg/errors"
 	"reflect"
 	"runtime"
 	"strings"
-	"tools"
 )
 
 // Encode 进行 golang 的序列化
