@@ -12,31 +12,26 @@ import (
 
 // 关于线程池简单示例: https://learnku.com/docs/gobyexample/2020/work-pool-worker/6285
 
-func worker(id int, jobs <-chan int, result chan<- int) {
-	for j := range jobs {
-		logs.Trace("worker: %d, processing job: %d", id, j)
-		time.Sleep(time.Second)
-		result <- j * 2
-	}
-}
+/**
+并发执行函数, 使用示例见 asyncExec_test.go 中的测试用例
 
-func WorkPoolDemo() {
-	jobs := make(chan int, 100)
-	results := make(chan int, 100)
+目前最佳试用场景是在 for 循环中重复执行的函数可以使用, 或者不需要接受返回结果的
 
-	for w := 1; w <= 3; w++ {
-		go worker(w, jobs, results)
-	}
+其他场景解析不同的函数返回数据会很繁琐
 
-	for j := 1; j <= 9; j++ {
-		jobs <- j
-	}
-	close(jobs)
-	for a := 1; a <= 9; a++ {
-		res := <-results
-		logs.Trace("res: %v", res)
-	}
-}
+新增功能:
+1. 添加线程控制, 可以通过 CallTask.WorkNum 控制并发数量
+2. 优化
+
+目前使用时碰到的问题:
+1. 如果超时设置为 3s, func 耗时也是 3s, 那因为 goroutine 调度机制下, 将随机返回数据, 这个边界情况需要考虑
+2. 参数传的值中包含指针的时候, 需要留意批量执行时的传参是否符合预期, 大概率需要拷贝出一个新的参数传进去
+*/
+
+//函数执行状态
+
+const StatusDone = 1
+const StatusWait = 0
 
 // CallTask 发起并发执行任务
 type CallTask struct {
@@ -48,10 +43,11 @@ type CallTask struct {
 
 // CallBody 单个函数的请求体
 type CallBody struct {
+	Status   int           // 执行状态
+	Index    int           // 传入时的顺序
 	FuncName interface{}   // 要执行的函数本体
 	Params   []interface{} // 要传的函数参数, 需要类型和数量都保持一致
-	Result   []interface{} // 函数返回的所有结果(包括常用 error), 包括业务返回的错误
-	Index    int           // 传入时的顺序
+	Result   []interface{} // 函数返回的所有结果(对应多参数返回)
 	Err      error         // 函数在 callBack 里调用时的错误
 }
 
@@ -60,26 +56,32 @@ func (cb *CallBody) GetResult(returnItems ...interface{}) error {
 	if cb.Err != nil {
 		return cb.Err
 	}
+
+	if cb.Status == StatusWait {
+		return fmt.Errorf("func not exec yet, index: %v", cb.Index)
+	}
+
 	return tools.InterfaceToResult(cb.Result, returnItems...)
 }
 
 // Worker 工作线程
 func Worker(ctx context.Context, jobs <-chan CallBody, result chan<- CallBody) {
-	logs.Info("ctx index: %v", ctx.Value("workIndex"))
+	logs.Info("start worker, ctx index: %v", ctx.Value("workIndex"))
 LOOP:
 	for {
 		select {
 		case <-ctx.Done():
-			logs.Error("work stop, ctx index: %v", ctx.Value("workIndex"))
+			logs.Trace("worker timeout stop, ctx index: %v", ctx.Value("workIndex"))
 			break LOOP
 		case curJob, ok := <-jobs:
 			if !ok {
-				logs.Error("work closed: %v", ok)
+				logs.Trace("worker closed, ctx index: %v", ctx.Value("workIndex"))
 				break LOOP
 			}
 			funcRes, funErr := CallFunc(curJob)
 			curJob.Err = funErr
 			curJob.Result = funcRes
+			curJob.Status = StatusDone
 			result <- curJob
 		}
 	}
@@ -119,10 +121,15 @@ func CallFunc(body CallBody) (result []interface{}, err error) {
 	return
 }
 
+// AddTask 添加工作任务
 func (task *CallTask) AddTask(job CallBody) *CallTask {
 	if task.TaskList == nil {
 		task.TaskList = make([]CallBody, 0, 10)
 	}
+	curIndex := len(task.TaskList)
+	job.Status = StatusWait
+	job.Index = curIndex
+
 	task.TaskList = append(task.TaskList, job)
 	return task
 }
@@ -144,9 +151,14 @@ func (task *CallTask) BatchExec() error {
 		task.MaxTime = time.Second * 10
 	}
 
-	// 设置个默认的工作线程
+	// 设置个默认的工作线程数量
 	if task.WorkNum == 0 {
 		task.WorkNum = 5
+	}
+
+	// 任务数少于线程数, 则按任务数来
+	if task.WorkNum > len(task.TaskList) {
+		task.WorkNum = len(task.TaskList)
 	}
 
 	jobChan := make(chan CallBody, len(task.TaskList))
@@ -179,7 +191,7 @@ func (task *CallTask) BatchExec() error {
 		for i := 0; i < max; i++ {
 			res, ok := <-resultChan
 			if !ok {
-				logs.Error("chan is empty")
+				logs.Trace("chan is empty")
 				return
 			}
 			// 将结果返回给原位置
