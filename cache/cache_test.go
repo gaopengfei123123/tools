@@ -1,6 +1,8 @@
 package cache
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"github.com/astaxie/beego/logs"
 	"github.com/go-redis/redis/v8"
@@ -98,9 +100,11 @@ func TestCallFuncBody_GetResult(t *testing.T) {
 	cache.SetExpire(GetFuncName(Demo), time.Second*180)
 	cache.SetExpire(GetFuncName(Demo2), time.Second*3600)
 
-	var resultMsg string
-	cache.CacheFunc(Demo, "params xxx").GetResult(&resultMsg)
-	logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo)), resultMsg)
+	gob.Register(&map[string]string{})
+
+	//var resultMsg string
+	//cache.CacheFunc(Demo, "params xxx").GetResult(&resultMsg)
+	//logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo)), resultMsg)
 
 	// TODO 这个有问题, map, 切片, 对象等传址的参数不能很好的识别
 	var mp map[string]string
@@ -109,6 +113,19 @@ func TestCallFuncBody_GetResult(t *testing.T) {
 	}
 	cache.CacheFunc(Demo2, tmp).GetResult(&mp)
 	logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo2)), mp)
+}
+
+func TestEncode(t *testing.T) {
+	var dao bytes.Buffer
+
+	tmp := map[string]string{
+		"Name": "GPF",
+	}
+	encoder := gob.NewEncoder(&dao)
+
+	err := encoder.Encode(tmp)
+	logs.Info("err: %v", err)
+	logs.Info("encode: %v", dao.String())
 }
 
 func Demo(msg string) (string, error) {

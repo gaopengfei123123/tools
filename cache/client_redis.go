@@ -55,6 +55,7 @@ func (c *RedisClient) SetExpire(k string, expire time.Duration) CommonDrive {
 func (c *RedisClient) Save(k string, v interface{}, expire time.Duration) error {
 	logs.Info("save")
 	b, err := Encode(v)
+	logs.Info("saveErr: %v", err)
 	if err != nil {
 		return err
 	}
@@ -118,6 +119,7 @@ func (c *RedisClient) CacheFunc(funcName interface{}, params ...interface{}) *Ca
 
 STEP1:
 	res, err := CallFunc(*cb)
+	logs.Info("notCache result: %v", res)
 	if err != nil {
 		cb.Err = err
 		return cb

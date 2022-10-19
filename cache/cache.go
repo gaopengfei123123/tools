@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
+	"github.com/astaxie/beego/logs"
 	"github.com/gaopengfei123123/tools"
 	"github.com/pkg/errors"
 	"reflect"
@@ -44,6 +45,7 @@ func (cb *CallFuncBody) GetResult(returnItems ...interface{}) error {
 	if cb.Err != nil {
 		return cb.Err
 	}
+	logs.Info("getResult: %s", cb.Result)
 
 	return tools.InterfaceToResult(cb.Result, returnItems...)
 }
