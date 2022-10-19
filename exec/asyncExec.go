@@ -133,6 +133,7 @@ func (task *CallTask) AddTask(job CallBody) *CallTask {
 	task.TaskList = append(task.TaskList, job)
 	return task
 }
+
 func (task *CallTask) BatchExec() error {
 	if len(task.TaskList) == 0 {
 		return nil
