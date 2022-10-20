@@ -193,7 +193,7 @@ func (task *CallTask) BatchExec() error {
 			res, ok := <-resultChan
 			if !ok {
 				logs.Trace("chan is empty")
-				return
+				break
 			}
 			// 将结果返回给原位置
 			task.TaskList[res.Index] = res
