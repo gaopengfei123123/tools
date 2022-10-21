@@ -7,8 +7,12 @@ import (
 	"testing"
 )
 
+// 测试单指标
 const MetricsLargeOrder = "MetricsLargeOrderCnt"
 const MetricsJoinedClass = "MetricsJoinedClassRoom"
+
+// 测试直方图聚合
+const ClueHistogramLargePayedTimeDateHistogram string = "LargePayedTimeDateHistogram"
 
 //func getEsCline() *elastic.Client {
 //	client, _ := elastic.NewClient(elastic.SetURL("http://0.0.0.0:9200"), elastic.SetTraceLog(new(tracelog)))
@@ -106,6 +110,32 @@ func TestGetTermsMetricsWithQuery(t *testing.T) {
 	logs.Info("res: \n%s", b)
 }
 
+// 测试获取直方图示例
+func TestGetHistogramMetrics(t *testing.T) {
+	initConfig()
+	// 直方图名
+	hisName := ClueHistogramLargePayedTimeDateHistogram
+	// 筛选参数
+	params := map[string]interface{}{
+		"large_course_id":    2138,
+		"large_course_stage": 28,
+		//"large_pay_time":     [2]int64{1, 123}, // 1 <= x <= 123
+	}
+	//[2]int{0, 123}, //  x <= 123
+	//[2]int{1, 0}, //  1 <= x
+	// 指标名
+	metrics := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+
+	res, err := GetHistogramMetrics(nil, hisName, metrics, params, getEsCline())
+	logs.Info("err: %v", err)
+
+	b, _ := convert.JSONEncode(res)
+	logs.Info("res: \n%s", b)
+}
+
 // 提前注入指标配置
 func initConfig() {
 	metrics := map[string]AggFunc{
@@ -115,6 +145,14 @@ func initConfig() {
 
 	for i := range metrics {
 		SetMetricsAgg(i, metrics[i])
+	}
+
+	histogram := map[string]AggHistogramFunc{
+		ClueHistogramLargePayedTimeDateHistogram: HistogramLargePayedTimeDate,
+	}
+
+	for i := range histogram {
+		SetHistogramAgg(i, histogram[i])
 	}
 
 	SetEsIndex("scrm_clue_new")
@@ -157,4 +195,23 @@ func commonNestedMetricsReturn(termQuery *elastic.BoolQuery, metrics elastic.Agg
 	metricsNested := elastic.NewNestedAggregation().Path(fieldPath)
 	metricsNested.SubAggregation(SignFilter, oneFilter)
 	return metricsNested
+}
+
+// HistogramLargePayedTimeDate 直方图统计指标
+func HistogramLargePayedTimeDate(aggList map[string]elastic.Aggregation) elastic.Aggregation {
+	dataField := "large_pay_time"
+	histogram := elastic.NewDateHistogramAggregation().
+		Field(dataField).
+		Interval("hour").
+		Format("YYYY-MM-dd").
+		MinDocCount(0).
+		TimeZone("Asia/Shanghai")
+
+	// 如果存在指标注入, 就放里面
+	if len(aggList) > 0 {
+		for aggName, aggBody := range aggList {
+			histogram.SubAggregation(aggName, aggBody)
+		}
+	}
+	return histogram
 }
