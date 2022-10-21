@@ -24,7 +24,8 @@ func TestGetBasicMetrics(t *testing.T) {
 	}
 
 	metrics := []string{
-		"MetricsLargeOrderCnt",
+		MetricsLargeOrder,
+		MetricsJoinedClass,
 	}
 
 	res, err := GetBasicMetrics(nil, metrics, params, getEsCline())
@@ -42,6 +43,7 @@ func TestGetBasicMetricsWithQuery(t *testing.T) {
 
 	metrics := []string{
 		MetricsLargeOrder,
+		MetricsJoinedClass,
 	}
 
 	res, err := GetBasicMetricsWithQuery(nil, metrics, query, getEsCline())
@@ -52,15 +54,26 @@ func TestGetBasicMetricsWithQuery(t *testing.T) {
 }
 
 func TestGetTermsMetrics(t *testing.T) {
+	initConfig()
+	// 筛选参数
 	params := map[string]interface{}{
 		"large_course_id":    2138,
 		"large_course_stage": 28,
 	}
+
+	// 要聚合的指标层级
+	termsList := []string{
+		"intention.source_key_4",
+		"intention.source_key_6",
+	}
+
 	// 指标名
 	metrics := []string{
 		MetricsLargeOrder,
+		MetricsJoinedClass,
 	}
-	res, err := GetBasicMetrics(nil, metrics, params, getEsCline())
+
+	res, err := GetTermsMetrics(nil, termsList, metrics, params, getEsCline())
 	logs.Info("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
