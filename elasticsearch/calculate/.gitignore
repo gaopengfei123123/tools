@@ -1,9 +1,1 @@
-vendor/
-node_modules/
-npm-debug.log
-*.log
-*.json
-*.log*
-.idea
-go.sum
-tmp.go
+tmp.*
