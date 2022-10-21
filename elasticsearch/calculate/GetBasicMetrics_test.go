@@ -7,15 +7,11 @@ import (
 	"testing"
 )
 
-func getEsCline() *elastic.Client {
-	client, _ := elastic.NewClient(elastic.SetURL("http://0.0.0.0:9200"), elastic.SetTraceLog(new(tracelog)))
-	return client
-}
+const MetricsLargeOrder = "MetricsLargeOrderCnt"
 
 // 调用简单指标的示例
 func TestGetBasicMetrics(t *testing.T) {
 	initConfig()
-
 	params := map[string]interface{}{
 		"large_course_id":    2138,
 		"large_course_stage": 28,
@@ -32,9 +28,25 @@ func TestGetBasicMetrics(t *testing.T) {
 	logs.Info("res: \n%s", b)
 }
 
+func TestGetBasicMetricsWithQuery(t *testing.T) {
+	query := elastic.NewBoolQuery()
+	query.Must(elastic.NewTermQuery("large_course_id", 2138))
+	query.Must(elastic.NewTermQuery("large_course_stage", 28))
+
+	metrics := []string{
+		MetricsLargeOrder,
+	}
+
+	res, err := GetBasicMetricsWithQuery(metrics, query, getEsCline(), nil)
+	logs.Info("err: %v", err)
+
+	b, _ := convert.JSONEncode(res)
+	logs.Info("res: \n%s", b)
+}
+
 func initConfig() {
 	metrics := map[string]AggFunc{
-		"MetricsLargeOrderCnt": MetricsLargeOrderCnt,
+		MetricsLargeOrder: MetricsLargeOrderCnt,
 	}
 
 	for i := range metrics {
