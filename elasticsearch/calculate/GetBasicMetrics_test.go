@@ -80,6 +80,33 @@ func TestGetTermsMetrics(t *testing.T) {
 	logs.Info("res: \n%s", b)
 }
 
+// 聚合指标查询1 一级字段+子文档字段
+func TestGetTermsMetricsWithQuery(t *testing.T) {
+	// 筛选参数
+	query := elastic.NewBoolQuery()
+	query.Must(elastic.NewTermQuery("large_course_id", 2138))
+	query.Must(elastic.NewTermQuery("large_course_stage", 28))
+
+	// 要聚合的指标层级
+	termsList := []string{
+		"intention_type",
+		"intention.source_system",
+	}
+
+	// 指标名
+	metrics := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+
+	res, err := GetTermsMetricsWithQuery(nil, termsList, metrics, query, getEsCline())
+	logs.Info("err: %v", err)
+
+	b, _ := convert.JSONEncode(res)
+	logs.Info("res: \n%s", b)
+}
+
+// 提前注入指标配置
 func initConfig() {
 	metrics := map[string]AggFunc{
 		MetricsLargeOrder:  MetricsLargeOrderCnt,

@@ -143,11 +143,11 @@ func GetTermsMetrics(ctx context.Context, termsList []string, metricsList []stri
 	}
 	// 获取 query
 	query := new(ParamsMapList).LoadConfig(scene, params).GenerateQuery()
-	return GetTermsMetricsWithQuery(termsList, metricsList, query, client, ctx, sceneName...)
+	return GetTermsMetricsWithQuery(ctx, termsList, metricsList, query, client, sceneName...)
 }
 
 // GetTermsMetricsWithQuery 以原生传参的方式, 获取聚合指标
-func GetTermsMetricsWithQuery(termsList []string, metricsList []string, query elastic.Query, client *elastic.Client, ctx context.Context, sceneName ...string) (result TermResult, err error) {
+func GetTermsMetricsWithQuery(ctx context.Context, termsList []string, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result TermResult, err error) {
 	if client == nil {
 		err = fmt.Errorf("esClient is nil")
 		return
@@ -163,11 +163,6 @@ func GetTermsMetricsWithQuery(termsList []string, metricsList []string, query el
 	}
 
 	result = TermResult{}
-
-	// 不再屏蔽空的metricsList 了
-	//if len(metricsList) == 0 {
-	//	//return
-	//}
 
 	// 获取需要用到的索引名
 	esIndex := esconfig.GetEsIndex(scene)
