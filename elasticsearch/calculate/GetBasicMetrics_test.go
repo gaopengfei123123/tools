@@ -8,6 +8,12 @@ import (
 )
 
 const MetricsLargeOrder = "MetricsLargeOrderCnt"
+const MetricsJoinedClass = "MetricsJoinedClassRoom"
+
+//func getEsCline() *elastic.Client {
+//	client, _ := elastic.NewClient(elastic.SetURL("http://0.0.0.0:9200"), elastic.SetTraceLog(new(tracelog)))
+//	return client
+//}
 
 // 调用简单指标的示例
 func TestGetBasicMetrics(t *testing.T) {
@@ -21,7 +27,7 @@ func TestGetBasicMetrics(t *testing.T) {
 		"MetricsLargeOrderCnt",
 	}
 
-	res, err := GetBasicMetrics(metrics, params, getEsCline(), nil)
+	res, err := GetBasicMetrics(nil, metrics, params, getEsCline())
 	logs.Info("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
@@ -29,6 +35,7 @@ func TestGetBasicMetrics(t *testing.T) {
 }
 
 func TestGetBasicMetricsWithQuery(t *testing.T) {
+	initConfig()
 	query := elastic.NewBoolQuery()
 	query.Must(elastic.NewTermQuery("large_course_id", 2138))
 	query.Must(elastic.NewTermQuery("large_course_stage", 28))
@@ -37,7 +44,23 @@ func TestGetBasicMetricsWithQuery(t *testing.T) {
 		MetricsLargeOrder,
 	}
 
-	res, err := GetBasicMetricsWithQuery(metrics, query, getEsCline(), nil)
+	res, err := GetBasicMetricsWithQuery(nil, metrics, query, getEsCline())
+	logs.Info("err: %v", err)
+
+	b, _ := convert.JSONEncode(res)
+	logs.Info("res: \n%s", b)
+}
+
+func TestGetTermsMetrics(t *testing.T) {
+	params := map[string]interface{}{
+		"large_course_id":    2138,
+		"large_course_stage": 28,
+	}
+	// 指标名
+	metrics := []string{
+		MetricsLargeOrder,
+	}
+	res, err := GetBasicMetrics(nil, metrics, params, getEsCline())
 	logs.Info("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
@@ -46,7 +69,8 @@ func TestGetBasicMetricsWithQuery(t *testing.T) {
 
 func initConfig() {
 	metrics := map[string]AggFunc{
-		MetricsLargeOrder: MetricsLargeOrderCnt,
+		MetricsLargeOrder:  MetricsLargeOrderCnt,
+		MetricsJoinedClass: MetricsJoinedClassRoom,
 	}
 
 	for i := range metrics {
@@ -56,7 +80,7 @@ func initConfig() {
 	SetEsIndex("scrm_clue_new")
 }
 
-// MetricsLargeOrderCnt
+// MetricsLargeOrderCnt 测试用指标
 func MetricsLargeOrderCnt(currentTerm ...string) elastic.Aggregation {
 	termQuery := elastic.NewBoolQuery()
 
@@ -69,4 +93,28 @@ func MetricsLargeOrderCnt(currentTerm ...string) elastic.Aggregation {
 	aggCount := elastic.NewValueCountAggregation().Field("is_buy_large_course")
 	metrics.SubAggregation(SignSingle, aggCount)
 	return metrics
+}
+
+func MetricsJoinedClassRoom(currentTerm ...string) elastic.Aggregation {
+	fieldPath := "join_classes"
+	field := "join_classes.is_display_group"
+
+	// 指标筛选条件
+	termQuery := elastic.NewBoolQuery()
+	termQuery.Must(elastic.NewTermQuery("join_classes.is_display_group", 1))
+	termQuery.Must(elastic.NewTermsQuery("join_classes.cust_wx_status", 1, 2))
+
+	// 指标聚合方式
+	metrics := elastic.NewValueCountAggregation().Field(field)
+
+	return commonNestedMetricsReturn(termQuery, metrics, fieldPath)
+}
+
+// 通用的带 query 查询的 nested 返回, 这个函数仅适用于 nested类型聚合 && 存在筛选条件  && 条件是同级子文档中的字段
+func commonNestedMetricsReturn(termQuery *elastic.BoolQuery, metrics elastic.Aggregation, fieldPath string) elastic.Aggregation {
+	oneFilter := elastic.NewFilterAggregation().Filter(termQuery)
+	oneFilter.SubAggregation(SignSingle, metrics)
+	metricsNested := elastic.NewNestedAggregation().Path(fieldPath)
+	metricsNested.SubAggregation(SignFilter, oneFilter)
+	return metricsNested
 }

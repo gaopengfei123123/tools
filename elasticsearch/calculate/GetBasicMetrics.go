@@ -10,7 +10,7 @@ import (
 /* es 聚合业务代码 */
 
 // GetBasicMetrics 获取简单指标
-func GetBasicMetrics(metricsList []string, params map[string]interface{}, client *elastic.Client, ctx context.Context, sceneName ...string) (result map[string]interface{}, err error) {
+func GetBasicMetrics(ctx context.Context, metricsList []string, params map[string]interface{}, client *elastic.Client, sceneName ...string) (result map[string]interface{}, err error) {
 	var scene string
 	if len(sceneName) != 0 {
 		scene = sceneName[0]
@@ -18,11 +18,11 @@ func GetBasicMetrics(metricsList []string, params map[string]interface{}, client
 
 	// 这里获取 query
 	query := new(ParamsMapList).LoadConfig(scene, params).GenerateQuery()
-	return GetBasicMetricsWithQuery(metricsList, query, client, ctx, sceneName...)
+	return GetBasicMetricsWithQuery(ctx, metricsList, query, client, sceneName...)
 }
 
 // GetBasicMetricsWithQuery 以原生传query 的方式获取值
-func GetBasicMetricsWithQuery(metricsList []string, query elastic.Query, client *elastic.Client, ctx context.Context, sceneName ...string) (result map[string]interface{}, err error) {
+func GetBasicMetricsWithQuery(ctx context.Context, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result map[string]interface{}, err error) {
 	if client == nil {
 		err = fmt.Errorf("esClient is nil")
 		return
