@@ -44,7 +44,7 @@ func initConfig() {
 	SetEsIndex("scrm_clue_new")
 }
 
-// MetricsLargeOrderCnt  大课订单数
+// MetricsLargeOrderCnt
 func MetricsLargeOrderCnt(currentTerm ...string) elastic.Aggregation {
 	termQuery := elastic.NewBoolQuery()
 
