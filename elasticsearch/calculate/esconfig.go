@@ -25,6 +25,7 @@ const (
 	QueryMustMulti    = "mustMulti"
 	QueryMustNot      = "MustNot"
 	QueryMustNotMulti = "mustNotMulti"
+	SignNotNull       = "NOT_NULL" // 非空标识符
 
 	MaxSize = 10000000 // 聚合 terms 的时候的最大数量
 )

@@ -196,21 +196,33 @@ func getMultiTerms(value interface{}) (terms []interface{}, isMulti bool) {
 
 // 检测是否是范围类型的数值
 func checkRangeValue(key string, value interface{}) (rangeQuery *elastic.RangeQuery, isRange bool) {
-	valueArr, ok := value.([2]int64)
-	if ok {
+	valueArr, ok := value.([]interface{})
+	if ok && len(valueArr) == 2 { // 如果恰好是两个值得数组, 则说明是range 类型的
 		isRange = true
 	} else {
 		return nil, false
 	}
 	query := elastic.NewRangeQuery(key)
-	if valueArr[0] > 0 {
+	if valueArr[0] != nil {
 		query.Gte(valueArr[0])
 	}
 
-	if valueArr[1] > 0 {
+	if valueArr[1] != nil {
 		query.Lte(valueArr[1])
 	}
 	return query, isRange
+}
+
+func checkNotNullValue(key string, value interface{}) bool {
+	vStr, ok := value.(string)
+	if !ok {
+		return false
+	}
+	var isNotNull bool
+	if vStr == SignNotNull {
+		isNotNull = true
+	}
+	return isNotNull
 }
 
 func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.BoolQuery {
@@ -237,10 +249,16 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 		terms, isMulti := getMultiTerms(cur.Value)
 
 		rangeQuery, isRange := checkRangeValue(cur.Key, cur.Value)
-		//logs.Info("curType: %v, curkey:%v, curValue: %v", cur.Type, cur.Key, cur.Value)
 
 		if isRange {
 			cur.Type = QueryRange
+		}
+
+		// 检测是否要求非空
+		isNotNull := checkNotNullValue(cur.Key, cur.Value)
+		if isNotNull {
+			cur.Type = QueryMustNot
+			cur.Value = ""
 		}
 
 		switch cur.Type {

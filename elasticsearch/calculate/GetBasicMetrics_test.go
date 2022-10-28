@@ -63,6 +63,7 @@ func TestGetTermsMetrics(t *testing.T) {
 	params := map[string]interface{}{
 		"large_course_id":    2138,
 		"large_course_stage": 28,
+		//"large_course_id":    []interface{}{nil, 2138},  // 范围查询方式
 	}
 
 	// 要聚合的指标层级
