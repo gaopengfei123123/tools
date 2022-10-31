@@ -39,6 +39,26 @@ func TestGetBasicMetrics(t *testing.T) {
 	logs.Info("res: \n%s", b)
 }
 
+func TestGetBasicMetrics2(t *testing.T) {
+	initConfig()
+	params := map[string]interface{}{
+		"account_id": "2621,2334,14",
+		"user_id": []interface{}{
+			"0", "888",
+		},
+	}
+	metrics := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+
+	res, err := GetBasicMetrics(nil, metrics, params, getEsCline())
+	logs.Info("err: %v", err)
+
+	b, _ := convert.JSONEncode(res)
+	logs.Info("res: \n%s", b)
+}
+
 func TestGetBasicMetricsWithQuery(t *testing.T) {
 	initConfig()
 	query := elastic.NewBoolQuery()

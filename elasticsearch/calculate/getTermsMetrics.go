@@ -182,6 +182,10 @@ func GetTermsMetricsWithQuery(ctx context.Context, termsList []string, metricsLi
 
 	searchResult, err := service.Size(0).Do(ctx)
 
+	if searchResult == nil || searchResult.Aggregations == nil {
+		return result, err
+	}
+
 	return BatchGetValueFromTerms(searchResult.Aggregations, metricsList, termsList)
 }
 

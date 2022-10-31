@@ -57,6 +57,11 @@ func GetBasicMetricsWithQuery(ctx context.Context, metricsList []string, query e
 
 	service.Query(query)
 	searchResult, err := service.Size(0).Do(ctx)
+
+	if searchResult == nil || searchResult.Aggregations == nil {
+		return result, err
+	}
+
 	return BatchGetValueFromAggData(searchResult.Aggregations, metricsList)
 }
 

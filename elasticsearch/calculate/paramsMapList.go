@@ -250,6 +250,8 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 
 		rangeQuery, isRange := checkRangeValue(cur.Key, cur.Value)
 
+		logs.Info("cur.Key: %v, isRange:%v", cur.Key, isRange)
+
 		if isRange {
 			cur.Type = QueryRange
 		}

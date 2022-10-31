@@ -108,6 +108,10 @@ func GetHistogramMetricsWithQuery(ctx context.Context, histogramName string, met
 	b, _ := convert.JSONEncode(searchResult)
 	logs.Info("searchResult: %s, err: %v", b, err)
 
+	if searchResult == nil || searchResult.Aggregations == nil {
+		return result, err
+	}
+
 	return result.LoadDataFromAggregations(searchResult.Aggregations)
 }
 
