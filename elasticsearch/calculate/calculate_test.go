@@ -43,8 +43,11 @@ func TestGetBasicMetrics2(t *testing.T) {
 	initConfig()
 	params := map[string]interface{}{
 		"account_id": "2621,2334,14",
-		"user_id": []interface{}{
+		"user_id": []interface{}{ // 范围查询示例
 			"0", "888",
+		},
+		"user_id2": []interface{}{ // 如果不是恰好2个, 就会认为是 terms
+			"0", "888", "999",
 		},
 	}
 	metrics := []string{

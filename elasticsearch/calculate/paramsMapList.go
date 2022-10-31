@@ -176,6 +176,11 @@ func (pl *ParamsMapList) GetKeyBodyOnce(path string, key string) (item *SearchCo
 
 // 判断是否是多个参数
 func getMultiTerms(value interface{}) (terms []interface{}, isMulti bool) {
+	ttValue, isArr := value.([]interface{})
+	if isArr {
+		return ttValue, true
+	}
+
 	terms = make([]interface{}, 0)
 	tmpValue, isString := value.(string)
 	if !isString {
