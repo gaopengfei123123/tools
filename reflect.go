@@ -99,7 +99,7 @@ func resultUnmarshal(src interface{}, dst interface{}) (err error) {
 	}()
 
 	dstRv := reflect.ValueOf(dst)
-	if dstRv.Kind() != reflect.Pointer || dstRv.IsNil() {
+	if dstRv.Kind() != reflect.Ptr || dstRv.IsNil() {
 		return fmt.Errorf("params[%v]不是一个引用类型参数", dst)
 	}
 	// 源是空的时候不做处理

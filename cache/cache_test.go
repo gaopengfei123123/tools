@@ -75,6 +75,41 @@ func TestLoadRedisClient(t *testing.T) {
 	t.Logf("method:Exist  key: %v exist: %v", key1, res)
 }
 
+func TestRedisClient_Save(t *testing.T) {
+	var tOffset int
+	logs.Info("resxxx: %#+v", tOffset)
+	tmpConfig := TopicConfig{
+		//"topic1": map[int32]int64{
+		//	12: 34,
+		//},
+		//"topic2": map[int32]int64{
+		//	22: 33,
+		//},
+	}
+	tmpConfig = SetTopicConfig(tmpConfig, "topic1", 12, 15)
+	logs.Info(tmpConfig)
+	//err = LoadRedisClient(redisClient).Save("TestLoadRedisClientInfoXXX", tmpConfig, time.Second*10)
+	//var resConfig TopicConfig
+	//err = LoadRedisClient(redisClient).Get("TestLoadRedisClientInfoXXX", &resConfig)
+	//logs.Info("resConfig: %#+v", resConfig)
+
+}
+
+func SetTopicConfig(conf TopicConfig, topic string, partition int32, offset int64) TopicConfig {
+	_, exist := conf[topic]
+	if !exist {
+		conf = make(map[string]map[int32]int64)
+	}
+	_, exist = conf[topic][partition]
+	if !exist {
+		conf[topic] = make(map[int32]int64)
+	}
+	conf[topic][partition] = offset
+	return conf
+}
+
+type TopicConfig map[string]map[int32]int64
+
 // 缓存方法示例
 func TestRedisClient_CacheFunc(t *testing.T) {
 	redisClient := getRedisClient()
