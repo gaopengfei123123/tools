@@ -359,3 +359,12 @@ func checkKeyNested(key string) (pth string, ky string, isNested bool) {
 func genTermKey(key string) string {
 	return "term_" + key
 }
+
+// GenTermKey 组合 term聚合的 key
+func GenTermKey(key string) string {
+	return genTermKey(key)
+}
+
+func CheckKeyNested(key string) (pth string, ky string, isNested bool) {
+	return checkKeyNested(key)
+}

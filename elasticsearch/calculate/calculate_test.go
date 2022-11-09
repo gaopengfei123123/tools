@@ -97,8 +97,8 @@ func TestGetTermsMetrics(t *testing.T) {
 
 	// 指标名
 	metrics := []string{
-		MetricsLargeOrder,
-		MetricsJoinedClass,
+		//MetricsLargeOrder,
+		//MetricsJoinedClass,
 	}
 
 	res, err := GetTermsMetrics(nil, termsList, metrics, params, getEsCline())
@@ -238,4 +238,111 @@ func HistogramLargePayedTimeDate(aggList map[string]elastic.Aggregation) elastic
 		}
 	}
 	return histogram
+}
+
+// builder 解析器
+func TestEsQueryBuilder_LoadParams(t *testing.T) {
+	termsList := []string{
+		"province_",
+	}
+	metricsList := []string{}
+
+	params := map[string]interface{}{
+		"lib_lib": "js",
+	}
+	builder := new(EsQueryBuilder)
+	// 将参数解析成 es query
+	requestQuery := builder.LoadParams(termsList, metricsList, params).GetStringQuery()
+	logs.Info("requestQuery: %v", requestQuery)
+}
+
+// 解析query
+func TestEsQueryBuilder_ParseQuery(t *testing.T) {
+	// 筛选参数
+	params := map[string]interface{}{
+		"large_course_id":    2138,
+		"large_course_stage": 28,
+		//"large_pay_time":     [2]int64{1, 123}, // 1 <= x <= 123
+	}
+
+	// 初始化 builder
+	builder := new(EsQueryBuilder)
+
+	query := builder.ParseQuery(params)
+	result, _ := convert.JSONEncode(query)
+	logs.Info("%s", result)
+}
+
+// 解析agg
+func TestEsQueryBuilder_ParseAgg(t *testing.T) {
+	// 要聚合的指标层级
+	termsList := []string{
+		"intention_type",
+		"intention.source_system",
+	}
+
+	// 指标名
+	metrics := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+
+	// 初始化 builder
+	builder := new(EsQueryBuilder)
+
+	agg := builder.ParseAgg(termsList, metrics)
+	result, _ := convert.JSONEncode(agg)
+	logs.Info("%s", result)
+}
+
+func TestEsQueryBuilder_ParseParamsToQuery(t *testing.T) {
+	// 要聚合的指标层级
+	termsList := []string{
+		"intention_type",
+		"intention.source_system",
+	}
+
+	// 指标名
+	metrics := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+	// 筛选参数
+	params := map[string]interface{}{
+		"large_course_id":    2138,
+		"large_course_stage": 28,
+		//"large_pay_time":     [2]int64{1, 123}, // 1 <= x <= 123
+	}
+
+	// 初始化 builder
+	builder := new(EsQueryBuilder)
+
+	query := builder.ParseParamsToQuery(termsList, metrics, params)
+	result, _ := convert.JSONEncode(query)
+	logs.Info("%s", result)
+}
+
+// builder 解析器
+func TestEsQueryBuilder_ParseSearchResult(t *testing.T) {
+	termsList := []string{
+		"province_",
+	}
+	metricsList := []string{}
+	params := map[string]interface{}{
+		"lib_lib": "js",
+	}
+
+	// 初始化 builder
+	builder := new(EsQueryBuilder)
+	builder.LoadParams(termsList, metricsList, params)
+
+	// 不管任何途径获取道德 es 结果, 只要符合 *elastic.SearchResult 就行
+	resultJson := `{"_shards":{"total":3,"failed":0,"successful":3,"skipped":0},"hits":{"hits":[],"total":156,"max_score":0},"took":0,"timed_out":false,"aggregations":{"term_province_":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"doc_count":156,"key":"北京"}]}}}`
+	searchResult := &elastic.SearchResult{}
+	convert.JSONDecode([]byte(resultJson), searchResult)
+
+	// 解析搜索结果
+	result, err := builder.ParseSearchResult(searchResult)
+	jsb, _ := convert.JSONEncode(result)
+	logs.Info("result: %s, err: %v", jsb, err)
 }

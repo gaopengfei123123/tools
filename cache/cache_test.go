@@ -76,6 +76,7 @@ func TestLoadRedisClient(t *testing.T) {
 }
 
 func TestRedisClient_Save(t *testing.T) {
+	redisClient := getRedisClient()
 	var tOffset int
 	logs.Info("resxxx: %#+v", tOffset)
 	tmpConfig := TopicConfig{
@@ -87,25 +88,39 @@ func TestRedisClient_Save(t *testing.T) {
 		//},
 	}
 	tmpConfig = SetTopicConfig(tmpConfig, "topic1", 12, 15)
+	tmpConfig = SetTopicConfig(tmpConfig, "topic2", 12, 15)
 	logs.Info(tmpConfig)
-	//err = LoadRedisClient(redisClient).Save("TestLoadRedisClientInfoXXX", tmpConfig, time.Second*10)
+	v, ok := GetTopicConfig(tmpConfig, "topic1", 12)
+	logs.Info("getTopicConfig: %v %v", v, ok)
+	v, ok = GetTopicConfig(tmpConfig, "topicxx", 12)
+	logs.Info("getTopicConfig: %v %v", v, ok)
+	err := LoadRedisClient(redisClient).Save("TestLoadRedisClientInfoXXX", tmpConfig, time.Second*300)
+	logs.Info("save err: %v", err)
 	//var resConfig TopicConfig
 	//err = LoadRedisClient(redisClient).Get("TestLoadRedisClientInfoXXX", &resConfig)
 	//logs.Info("resConfig: %#+v", resConfig)
 
+	res := TopicConfig{}
+	LoadRedisClient(redisClient).Get("TestLoadRedisClientInfoXXX", &res)
+	logs.Info("result: %v", res)
 }
 
 func SetTopicConfig(conf TopicConfig, topic string, partition int32, offset int64) TopicConfig {
 	_, exist := conf[topic]
 	if !exist {
-		conf = make(map[string]map[int32]int64)
-	}
-	_, exist = conf[topic][partition]
-	if !exist {
 		conf[topic] = make(map[int32]int64)
 	}
 	conf[topic][partition] = offset
 	return conf
+}
+
+func GetTopicConfig(conf TopicConfig, topic string, partition int32) (int64, bool) {
+	part, exist := conf[topic]
+	if !exist {
+		return 0, false
+	}
+	offset, exist := part[partition]
+	return offset, exist
 }
 
 type TopicConfig map[string]map[int32]int64
