@@ -230,6 +230,15 @@ func checkNotNullValue(key string, value interface{}) bool {
 	return isNotNull
 }
 
+func checkSubKey(key string) string {
+	strArr := strings.Split(key, ">")
+
+	if len(strArr) > 0 {
+		return strings.Join(strArr, ".")
+	}
+	return key
+}
+
 func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.BoolQuery {
 	if len(ec.Conditions) == 0 {
 		return query
@@ -267,6 +276,9 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 			cur.Type = QueryMustNot
 			cur.Value = ""
 		}
+
+		// 判断是否是二级字段 (这就是关键字符冲突造的孽)
+		cur.Key = checkSubKey(cur.Key)
 
 		switch cur.Type {
 		case QueryRange:

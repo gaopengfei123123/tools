@@ -50,6 +50,10 @@ type AggFunc func(currentTerm ...string) elastic.Aggregation
 // AggHistogramFunc 直方聚合查询
 type AggHistogramFunc func(aggList map[string]elastic.Aggregation) elastic.Aggregation
 
+func GetEsConfig() *ESConfig {
+	return esconfig
+}
+
 func SetMetricsAgg(metricName string, aggFuncList ...AggFunc) {
 	esconfig.Lock()
 	defer esconfig.Unlock()

@@ -248,7 +248,8 @@ func TestEsQueryBuilder_LoadParams(t *testing.T) {
 	metricsList := []string{}
 
 	params := map[string]interface{}{
-		"lib_lib": "js",
+		"lib_lib":             "js",
+		"corp_type>corp_type": "123",
 	}
 	builder := new(EsQueryBuilder)
 	// 将参数解析成 es query
