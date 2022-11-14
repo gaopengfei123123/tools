@@ -190,12 +190,12 @@ func GetTermsMetricsWithQuery(ctx context.Context, termsList []string, metricsLi
 }
 
 // BatchGenerateMetricsAgg 将指标批量加载进去
-func BatchGenerateMetricsAgg(scene string, agg *elastic.TermsAggregation, metricsList []string, currentTerm string) *elastic.TermsAggregation {
+func BatchGenerateMetricsAgg(scene string, agg *elastic.TermsAggregation, metricsList []string, currentTerm string, isNested bool) *elastic.TermsAggregation {
 	if agg == nil || len(metricsList) == 0 {
 		return agg
 	}
 
-	_, _, isNested := checkKeyNested(currentTerm)
+	//_, _, isNested := checkKeyNested(currentTerm)
 
 	for i := 0; i < len(metricsList); i++ {
 		metricsName := metricsList[i]
@@ -238,7 +238,7 @@ func BuildTermAgg(scene string, termList []string, metricsList []string, level .
 	lv = lv + 1
 	// 这时候说明是最后一层term 了, 给它挂上指标
 	if lv == len(termList) {
-		agg = BatchGenerateMetricsAgg(scene, agg, metricsList, key)
+		agg = BatchGenerateMetricsAgg(scene, agg, metricsList, key, isNested)
 	}
 
 	childAgg := BuildTermAgg(scene, termList, metricsList, lv)
