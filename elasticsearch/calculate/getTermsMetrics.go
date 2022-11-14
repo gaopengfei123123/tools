@@ -347,10 +347,19 @@ func BatchGetValueFromTerms(aggRes elastic.Aggregations, metricList []string, te
 func checkKeyNested(key string) (pth string, ky string, isNested bool) {
 	ky = key
 	isNested = false
-	arr := strings.Split(key, ".")
+	arr := strings.Split(key, SignNested)
 	if len(arr) > 1 {
 		isNested = true
 		pth = arr[0]
+		return
+	}
+
+	// 这里针对非 nested 类型的 object 类型数据
+	arr = strings.Split(key, SignObject)
+	if len(arr) > 1 {
+		isNested = false
+		ky = strings.Join(arr, ".")
+		pth = ""
 	}
 	return
 }

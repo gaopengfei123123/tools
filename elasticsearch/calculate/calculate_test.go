@@ -257,6 +257,22 @@ func TestEsQueryBuilder_LoadParams(t *testing.T) {
 	logs.Info("requestQuery: %v", requestQuery)
 }
 
+// builder 解析器
+func TestEsQueryBuilder_LoadParams2(t *testing.T) {
+	termsList := []string{
+		"properties>account_type", // 针对query 中出现的  properties.account_type 查询
+	}
+	metricsList := []string{}
+
+	params := map[string]interface{}{
+		"event": "siteYsPageView",
+	}
+	builder := new(EsQueryBuilder)
+	// 将参数解析成 es query
+	requestQuery := builder.LoadParams(termsList, metricsList, params).GetStringQuery()
+	logs.Info("requestQuery: %v", requestQuery)
+}
+
 // 解析query
 func TestEsQueryBuilder_ParseQuery(t *testing.T) {
 	// 筛选参数
@@ -279,6 +295,28 @@ func TestEsQueryBuilder_ParseAgg(t *testing.T) {
 	// 要聚合的指标层级
 	termsList := []string{
 		"intention_type",
+		"intention.source_system",
+	}
+
+	// 指标名
+	metrics := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+
+	// 初始化 builder
+	builder := new(EsQueryBuilder)
+
+	agg := builder.ParseAgg(termsList, metrics)
+	result, _ := convert.JSONEncode(agg)
+	logs.Info("%s", result)
+}
+
+func TestEsQueryBuilder_ParseAgg2(t *testing.T) {
+	// 要聚合的指标层级
+	termsList := []string{
+		//"intention_type",
+		"intention>source_system",
 		"intention.source_system",
 	}
 

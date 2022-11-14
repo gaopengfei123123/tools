@@ -11,6 +11,8 @@ const (
 	SignFilter  = "metric_filter"
 	SignTerms   = "metrics_terms"
 	SignChild   = "metrics_child"
+	SignNested  = "." // nested类型字段连接方式  nested A下的字段B, 写成 A.B 实际按
+	SignObject  = ">" // object类型字段链接方式  object A下的字段 B, 写成 A>B, 最终转换成 A.B
 )
 
 const (
