@@ -27,6 +27,11 @@ LOOP:
 			if err != nil {
 				logs.Info("addJob err: %v", err)
 			}
+
+			//// 模拟主动退出的情况
+			//if i == 5 {
+			//	cancel()
+			//}
 		case <-timeout:
 			logs.Info("timeout, stop")
 			break LOOP
@@ -73,6 +78,13 @@ func demoFunction(message []interface{}) {
 	logs.Info("demoFunc: %v", message)
 }
 
+func TestBufferQueue_AddJob(t *testing.T) {
+	buffer := NewBufferQueue()
+
+	err := buffer.AddJob("xxx")
+	logs.Info("err: %v", err)
+}
+
 // 模拟主动退出
 func TestBufferQueue_Stop(t *testing.T) {
 	buffer := NewBufferQueue()
@@ -90,6 +102,7 @@ LOOP:
 			i += 1
 			if err != nil {
 				logs.Info("addJob err: %v", err)
+				break LOOP
 			}
 
 			// 模拟主动退出的情况
