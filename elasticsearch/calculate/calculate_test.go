@@ -361,6 +361,34 @@ func TestEsQueryBuilder_ParseParamsToQuery(t *testing.T) {
 	logs.Info("%s", result)
 }
 
+// 模拟params 传空的情况
+func TestEsQueryBuilder_ParseParamsToQuery2(t *testing.T) {
+	// 要聚合的指标层级
+	termsList := []string{
+		"intention_type",
+		"intention.source_system",
+	}
+
+	// 指标名
+	metrics := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+	// 筛选参数
+	params := map[string]interface{}{
+		"large_course_id":    2138,
+		"large_course_stage": 28,
+		//"large_pay_time":     [2]int64{1, 123}, // 1 <= x <= 123
+	}
+
+	// 初始化 builder
+	builder := new(EsQueryBuilder)
+
+	query := builder.ParseParamsToQuery(termsList, metrics, params)
+	result, _ := convert.JSONEncode(query)
+	logs.Info("%s", result)
+}
+
 // builder 解析器
 func TestEsQueryBuilder_ParseSearchResult(t *testing.T) {
 	termsList := []string{

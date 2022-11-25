@@ -76,6 +76,9 @@ func (builder *EsQueryBuilder) ParseQuery(params map[string]interface{}) interfa
 // ParseAgg 解析 agg
 func (builder *EsQueryBuilder) ParseAgg(termsList []string, metricsList []string) interface{} {
 	agg := BuildTermAgg("", termsList, metricsList)
+	if len(termsList) == 0 {
+		return nil
+	}
 	service := elastic.NewTermsAggregation()
 	_, key, isNested := CheckKeyNested(termsList[0])
 	if isNested {

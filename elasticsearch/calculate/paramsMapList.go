@@ -329,6 +329,10 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 func (ecg *EsQueryConfig) BuildBoolQuery() *elastic.BoolQuery {
 	query := elastic.NewBoolQuery()
 
+	if ecg == nil {
+		return query
+	}
+
 	if len(ecg.Conditions) == 0 {
 		return query
 	}

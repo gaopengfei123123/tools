@@ -171,6 +171,10 @@ func GetTermsMetricsWithQuery(ctx context.Context, termsList []string, metricsLi
 	// 递归组装 term 以及 agg
 	agg := BuildTermAgg(scene, termsList, metricsList)
 
+	if len(termsList) == 0 {
+		return result, fmt.Errorf("请输入要聚合的字段")
+	}
+
 	_, key, isNested := checkKeyNested(termsList[0])
 	if isNested {
 		service.Aggregation(SignChild, agg)
