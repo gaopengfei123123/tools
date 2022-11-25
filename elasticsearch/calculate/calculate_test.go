@@ -14,10 +14,10 @@ const MetricsJoinedClass = "MetricsJoinedClassRoom"
 // 测试直方图聚合
 const ClueHistogramLargePayedTimeDateHistogram string = "LargePayedTimeDateHistogram"
 
-//func getEsCline() *elastic.Client {
-//	client, _ := elastic.NewClient(elastic.SetURL("http://0.0.0.0:9200"), elastic.SetTraceLog(new(tracelog)))
-//	return client
-//}
+func getEsCline() *elastic.Client {
+	client, _ := elastic.NewClient(elastic.SetURL("http://0.0.0.0:9200"), elastic.SetTraceLog(new(tracelog)))
+	return client
+}
 
 // 调用简单指标的示例
 func TestGetBasicMetrics(t *testing.T) {
