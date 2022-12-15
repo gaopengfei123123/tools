@@ -3,6 +3,7 @@ package calculate
 import (
 	"context"
 	"fmt"
+	"github.com/astaxie/beego/logs"
 	"github.com/olivere/elastic/v7"
 	"strings"
 )
@@ -30,23 +31,43 @@ func (t *TermItem) GetFilteredData() map[string]interface{} {
 }
 
 // GetCombineTerm 获取
-func (t *TermItem) GetCombineTerm() string {
+func (t *TermItem) GetCombineTerm(outputTerm []int) string {
 	str := make([]string, 0)
 
-	for i := 0; i < len(t.Terms); i++ {
-		str = append(str, fmt.Sprintf("%v", t.Terms[i]))
+	// 传空输出全部
+	if len(outputTerm) == 0 {
+		for i := 0; i < len(t.Terms); i++ {
+			str = append(str, fmt.Sprintf("%v", t.Terms[i]))
+		}
+	} else {
+		maxLen := len(t.Terms)
+		for _, v := range outputTerm {
+			if v >= maxLen {
+				continue
+			}
+			str = append(str, fmt.Sprintf("%v", t.Terms[v]))
+		}
 	}
+
 	return strings.Join(str, "_")
 }
 
-func (ti *TermResult) GetMapDataResult() (result []map[string]interface{}, err error) {
+// GetMapDataResult 获取扁平化的结果, 如果存在 termFilter , 则根据filter 值得顺序进行过滤
+func (ti *TermResult) GetMapDataResult(outputTerm []int, termFilter ...interface{}) (result []map[string]interface{}, err error) {
 	result = make([]map[string]interface{}, 0)
 	if len(ti.Result) == 0 {
 		return nil, nil
 	}
 
 	for _, curTermItem := range ti.Result {
-		term := curTermItem.GetCombineTerm()
+		isFilted := ti.TermFilter(curTermItem, termFilter...)
+		if isFilted {
+			// 因为命中了过滤条件, 不输出
+			logs.Info("触发命中: term: %v, filter: %v", curTermItem.Terms, termFilter)
+			continue
+		}
+
+		term := curTermItem.GetCombineTerm(outputTerm)
 		metrics := curTermItem.GetFilteredData()
 		tmp := map[string]interface{}{
 			"metrics": metrics,
@@ -58,6 +79,7 @@ func (ti *TermResult) GetMapDataResult() (result []map[string]interface{}, err e
 	return result, nil
 }
 
+// LoopTermsFromAgg 当传入到这里的时候, 已经能取一级 term 的 bucket 了
 // LoopTermsFromAgg 当传入到这里的时候, 已经能取一级 term 的 bucket 了
 func (ti *TermResult) LoopTermsFromAgg(aggRes *elastic.AggregationBucketKeyItems, columnValue []interface{}, level ...int) error {
 	var lv int // 这里标明当前所处的层级, 初始是1
@@ -380,4 +402,25 @@ func GenTermKey(key string) string {
 
 func CheckKeyNested(key string) (pth string, ky string, isNested bool) {
 	return checkKeyNested(key)
+}
+
+func (ti *TermResult) TermFilter(targetTerms TermItem, termFilter ...interface{}) bool {
+	if len(termFilter) == 0 {
+		return false
+	}
+
+	maxLen := len(targetTerms.Terms)
+
+	for i := 0; i < len(termFilter); i++ {
+		// 超过筛选范围则终止判断
+		if i > maxLen {
+			break
+		}
+		target := fmt.Sprintf("%v", targetTerms.Terms[i])
+		filter := fmt.Sprintf("%v", termFilter[i])
+		if target != filter {
+			return true
+		}
+	}
+	return false
 }

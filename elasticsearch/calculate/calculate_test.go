@@ -39,6 +39,17 @@ func TestGetBasicMetrics(t *testing.T) {
 	logs.Info("res: \n%s", b)
 }
 
+func TestGetTermsMetrics3(t *testing.T) {
+	termQuery := elastic.NewBoolQuery()
+
+	termQuery.Must(elastic.NewTermQuery("form_is_repeat_buy", 1))
+	termQuery.Must(elastic.NewTermQuery("operate_config_id", 905))
+
+	ctx, _ := termQuery.Source()
+	b, _ := convert.JSONEncode(ctx)
+	logs.Info("%s", b)
+}
+
 func TestGetBasicMetrics2(t *testing.T) {
 	initConfig()
 	params := map[string]interface{}{
