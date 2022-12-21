@@ -52,16 +52,17 @@ func (t *TermItem) GetCombineTerm(outputTerm []int) string {
 	return strings.Join(str, "_")
 }
 
+type FilterFunc func(curTermItem []interface{}) bool
+
 // GetMapDataResult 获取扁平化的结果, 如果存在 termFilter , 则根据filter 值得顺序进行过滤
-func (ti *TermResult) GetMapDataResult(outputTerm []int, termFilter ...interface{}) (result []map[string]interface{}, err error) {
+func (ti *TermResult) GetMapDataResult(outputTerm []int, termFilter FilterFunc) (result []map[string]interface{}, err error) {
 	result = make([]map[string]interface{}, 0)
 	if len(ti.Result) == 0 {
 		return nil, nil
 	}
 
 	for _, curTermItem := range ti.Result {
-		isFilted := ti.TermFilter(curTermItem, termFilter...)
-		if isFilted {
+		if termFilter != nil && termFilter(curTermItem.Terms) {
 			// 因为命中了过滤条件, 不输出
 			logs.Info("触发命中: term: %v, filter: %v", curTermItem.Terms, termFilter)
 			continue
@@ -418,6 +419,7 @@ func (ti *TermResult) TermFilter(targetTerms TermItem, termFilter ...interface{}
 		}
 		target := fmt.Sprintf("%v", targetTerms.Terms[i])
 		filter := fmt.Sprintf("%v", termFilter[i])
+		logs.Info("target: %v, filter: %v", target, filter)
 		if target != filter {
 			return true
 		}
