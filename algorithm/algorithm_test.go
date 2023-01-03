@@ -19,3 +19,10 @@ func TestFindKthLargest(t *testing.T) {
 	//logs.Info("[3,2,1,5,6,4], k = 2, res:", FindKthLargest([]int{3, 2, 1, 5, 6, 4}, 2))
 	logs.Info("[3,2,1,5,6,4], k = 2, res:", _quickSort([]int{3, 2, 1, 5, 6, 4}, 0, 5))
 }
+
+func TestFindKthLargest2(t *testing.T) {
+	v := float64(1005328)
+	logs.Info("value: %v", v)
+	logs.Info("value: %0.f", v)
+
+}
