@@ -91,6 +91,7 @@ func (c *RedisClient) Exist(k string) bool {
 	return true
 }
 
+// CacheFunc 这里主要做的几件事, 1. 根据方法名和传参获取缓存, 注册返回值类型 key, 2. 查询是否存在对应 key 的缓存结果, 3. 返回缓存/返回执行结果
 func (c *RedisClient) CacheFunc(funcName interface{}, params ...interface{}) *CallFuncBody {
 	logs.Info("CacheFunc")
 	cb := &CallFuncBody{

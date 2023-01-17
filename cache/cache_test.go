@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/logs"
 	"github.com/go-redis/redis/v8"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -150,19 +151,42 @@ func TestCallFuncBody_GetResult(t *testing.T) {
 	cache.SetExpire(GetFuncName(Demo), time.Second*180)
 	cache.SetExpire(GetFuncName(Demo2), time.Second*3600)
 
+	var resultMsg string
+	cache.CacheFunc(Demo, "params xxx").GetResult(&resultMsg)
+	logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo)), resultMsg)
+
+	// 必须提前注册类型, 不然解不出来
 	gob.Register(&map[string]string{})
-
-	//var resultMsg string
-	//cache.CacheFunc(Demo, "params xxx").GetResult(&resultMsg)
-	//logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo)), resultMsg)
-
 	// TODO 这个有问题, map, 切片, 对象等传址的参数不能很好的识别
 	var mp map[string]string
 	tmp := map[string]string{
-		"Name": "GPF",
+		"Name": "GPFXX",
 	}
 	cache.CacheFunc(Demo2, tmp).GetResult(&mp)
-	logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo2)), mp)
+	logs.Info("Func: Demo2,   expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo2)), mp)
+}
+
+// 缓存复杂类型的数据测试
+func TestCallFuncBody_GetResult2(t *testing.T) {
+	cache := LoadRedisClient(getRedisClient())
+
+	var result *DemoResult
+	result = &DemoResult{}
+	gob.Register(result)
+	err := cache.CacheFunc(Demo3, int32(3)).GetResult(&result)
+	logs.Info("Func demo3, err: %v, result: %#+v", err, result)
+
+	result = Demo3(3)
+	logs.Info("NoCache: %#+v", result)
+}
+
+func TestRedisClient_CacheFunc2(t *testing.T) {
+	m0 := reflect.TypeOf(Demo2)
+
+	for i := 0; i < m0.NumOut(); i++ {
+		logs.Info("返回值: %#+v", m0.Out(i))
+		logs.Info("索引: %v", m0.Out(i).String())
+	}
 }
 
 func TestEncode(t *testing.T) {
@@ -178,6 +202,7 @@ func TestEncode(t *testing.T) {
 	logs.Info("encode: %v", dao.String())
 }
 
+// 用来测试缓存的函数1
 func Demo(msg string) (string, error) {
 	t := time.Now()
 	tt := t.Format("06-01-02 15:04:05")
@@ -185,10 +210,45 @@ func Demo(msg string) (string, error) {
 	return res, nil
 }
 
+// 用来测试缓存的函数2
 func Demo2(mp map[string]string) (map[string]string, error) {
 	t := time.Now()
 	tt := t.Format("06-01-02 15:04:05")
 	res := fmt.Sprintf("map: %s, time: %s", mp, tt)
 	mp["timer"] = res
 	return mp, nil
+}
+
+type DemoResult struct {
+	ID          int32
+	ListType    []DemoResultItem
+	ListTypePtr []*DemoResultItem
+	Name        string
+	Child       DemoResultItem
+	ChildPtr    *DemoResultItem
+	Date        string
+}
+
+type DemoResultItem struct {
+	Key   string
+	Value string
+}
+
+func Demo3(id int32) *DemoResult {
+	result := &DemoResult{}
+	result.ID = id
+
+	demoList1 := make([]DemoResultItem, 0)
+	result.ListType = append(demoList1, DemoResultItem{"For", "Bar"}, DemoResultItem{"For2", "Bar"})
+
+	demoListPtr := make([]*DemoResultItem, 0)
+	result.ListTypePtr = append(demoListPtr, &DemoResultItem{"For2", "Bar2"}, &DemoResultItem{"For22", "Bar2"})
+
+	result.Name = "xxx"
+	result.Child = DemoResultItem{"For3", "Bar3"}
+	result.ChildPtr = &DemoResultItem{"For4", "Bar4"}
+
+	result.Date = time.Now().Format("2006-01-02 15:04:05")
+
+	return result
 }
