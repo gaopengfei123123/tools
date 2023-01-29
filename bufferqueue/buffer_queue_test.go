@@ -80,6 +80,7 @@ func demoFunction(message []interface{}) {
 
 func TestBufferQueue_AddJob(t *testing.T) {
 	buffer := NewBufferQueue()
+	buffer.Start(context.TODO())
 
 	err := buffer.AddJob("xxx")
 	logs.Info("err: %v", err)

@@ -2,6 +2,7 @@ package bufferqueue
 
 import (
 	"context"
+	"fmt"
 	"github.com/astaxie/beego/logs"
 	"sync"
 	"time"
@@ -71,6 +72,12 @@ func (bf *BufferQueue) Stop() {
 
 func (bf *BufferQueue) AddJob(msg interface{}) error {
 	var err error
+
+	if bf.job == nil {
+		return fmt.Errorf("please exec BufferQueue.")
+	}
+
+	logs.Info("job channel: %v", bf.job)
 	bf.job <- msg
 	return err
 }
