@@ -52,9 +52,11 @@ func (cb *CallFuncBody) GetResult(returnItems ...interface{}) error {
 
 func (cb *CallFuncBody) GetCacheKey() (key string, funcName string, err error) {
 	paramsStr := fmt.Sprintf("%v", cb.Params)
+	logs.Info("paramsStr1: %s", paramsStr)
 	h := md5.New()
 	h.Write([]byte(paramsStr))
 	paramsStr = hex.EncodeToString(h.Sum(nil))
+	logs.Info("paramsStr2: %s", paramsStr)
 	//logs.Info("%v", GetFuncName(cb.FuncName))
 	funcName = GetFuncName(cb.FuncName)
 	key = fmt.Sprintf("CacheFuncKey:%s:%v", GetFuncName(cb.FuncName), paramsStr)

@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"github.com/astaxie/beego/logs"
+	"github.com/gaopengfei123123/tools"
 	"github.com/go-redis/redis/v8"
 	"reflect"
 	"testing"
@@ -175,6 +176,8 @@ func TestCallFuncBody_GetResult2(t *testing.T) {
 	gob.Register(result)
 	err := cache.CacheFunc(Demo3, int32(3)).GetResult(&result)
 	logs.Info("Func demo3, err: %v, result: %#+v", err, result)
+
+	tools.PrintJson("cache result", result)
 
 	result = Demo3(3)
 	logs.Info("NoCache: %#+v", result)
