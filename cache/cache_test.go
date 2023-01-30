@@ -183,6 +183,12 @@ func TestCallFuncBody_GetResult2(t *testing.T) {
 	logs.Info("NoCache: %#+v", result)
 }
 
+func TestRedisClient_DeleteFunc(t *testing.T) {
+	cache := LoadRedisClient(getRedisClient())
+	res := cache.DeleteFunc(Demo3, int32(3))
+	logs.Info("delete res: %v", res)
+}
+
 func TestRedisClient_CacheFunc2(t *testing.T) {
 	m0 := reflect.TypeOf(Demo2)
 

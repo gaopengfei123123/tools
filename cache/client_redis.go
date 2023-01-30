@@ -91,6 +91,24 @@ func (c *RedisClient) Exist(k string) bool {
 	return true
 }
 
+// DeleteFunc 删除对应的函数结果缓存
+func (c *RedisClient) DeleteFunc(funcName interface{}, params ...interface{}) bool {
+	logs.Info("DeleteFunc")
+	cb := &CallFuncBody{
+		FuncName: funcName,
+		Params:   params,
+		cache:    c,
+	}
+
+	cacheKey, _, err := cb.GetCacheKey()
+	logs.Trace("cacheKey: %v, err: %v", cacheKey, err)
+	if err != nil {
+		return false
+	}
+
+	return c.Delete(cacheKey)
+}
+
 // CacheFunc 这里主要做的几件事, 1. 根据方法名和传参获取缓存, 注册返回值类型 key, 2. 查询是否存在对应 key 的缓存结果, 3. 返回缓存/返回执行结果
 func (c *RedisClient) CacheFunc(funcName interface{}, params ...interface{}) *CallFuncBody {
 	logs.Info("CacheFunc")
