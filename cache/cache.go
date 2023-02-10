@@ -22,7 +22,7 @@ func Encode(v interface{}) ([]byte, error) {
 	if vArr, ok := v.([]interface{}); ok {
 		for i := 0; i < len(vArr); i++ {
 			rf := reflect.ValueOf(vArr[i])
-			if rf.Kind() == reflect.Pointer && rf.IsNil() {
+			if rf.Kind() == reflect.Ptr && rf.IsNil() {
 				vArr[i] = nil
 			}
 		}
