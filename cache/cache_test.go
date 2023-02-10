@@ -198,6 +198,19 @@ func TestRedisClient_CacheFunc2(t *testing.T) {
 	}
 }
 
+// gob: cannot encode nil pointer of type *errcode.Error inside interface
+// 这里调整了 cache/cache.go:18 的逻辑
+func TestRedisClient_CacheFunc3(t *testing.T) {
+	cache := LoadRedisClient(getRedisClient())
+	result := cache.CacheFunc(Demo4, 3)
+	logs.Info("res: %#+v", result)
+
+	var res int
+	var err *Error
+	result.GetResult(&res, &err)
+	logs.Info("result: %#+v, %#+v", res, err)
+}
+
 func TestEncode(t *testing.T) {
 	var dao bytes.Buffer
 
@@ -226,6 +239,17 @@ func Demo2(mp map[string]string) (map[string]string, error) {
 	res := fmt.Sprintf("map: %s, time: %s", mp, tt)
 	mp["timer"] = res
 	return mp, nil
+}
+
+func Demo4(id int) (int, *Error) {
+	return id, nil
+}
+
+type Error struct {
+	code           int
+	httpStatusCode int
+	msg            string
+	details        []string
 }
 
 type DemoResult struct {

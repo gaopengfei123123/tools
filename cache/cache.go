@@ -17,7 +17,19 @@ import (
 // Encode 进行 golang 的序列化
 func Encode(v interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)
+
+	// 规避 nil的情况  cannot encode nil pointer of type xxxx
+	if vArr, ok := v.([]interface{}); ok {
+		for i := 0; i < len(vArr); i++ {
+			rf := reflect.ValueOf(vArr[i])
+			if rf.Kind() == reflect.Pointer && rf.IsNil() {
+				vArr[i] = nil
+			}
+		}
+		v = vArr
+	}
 	enc := gob.NewEncoder(buf)
+	logs.Info("encode: %#+v", v)
 	if err := enc.Encode(v); err != nil {
 		return buf.Bytes(), err
 	}
