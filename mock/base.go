@@ -1,7 +1,9 @@
 package mock
 
 import (
+	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -11,6 +13,8 @@ var genderPool *RandPool          // 性别
 var orderPool *RandPool           // 近30天是否下单
 var osPool *RandPool              // 手机平台
 var sourcePagePool *RandPool      // 来源页
+var remotePool *RandPool          // 是否异地
+var hourPool *RandPool            // 时间段
 
 type RandPool struct {
 	OriList map[int]string    // 获取原始的配比
@@ -51,7 +55,7 @@ func GetRandInt(max int) int {
 	return rand.Intn(max)
 }
 
-func GetRandCity() string {
+func GetRandCity(exclude ...string) string {
 	if cityPool == nil {
 		mp := map[string]int{
 			"北京": 100,
@@ -66,6 +70,17 @@ func GetRandCity() string {
 		cityPool = new(RandPool)
 		cityPool.LoadConfig(mp)
 	}
+
+	if len(exclude) != 0 {
+		v := exclude[0]
+		for {
+			ct := cityPool.GetItem()
+			if ct != v {
+				return ct
+			}
+		}
+	}
+
 	return cityPool.GetItem()
 }
 
@@ -137,6 +152,56 @@ func GetRandOS() string {
 	return osPool.GetItem()
 }
 
+// GetRandRemote  是否异地
+func GetRandRemote() string {
+	if remotePool == nil {
+		conf := map[string]int{
+			"本地": 6,
+			"异地": 4,
+		}
+		remotePool = new(RandPool)
+		remotePool.LoadConfig(conf)
+	}
+	return remotePool.GetItem()
+}
+
+// GetRandHour  获取随机的时间段
+func GetRandHour() int {
+	if hourPool == nil {
+		conf := map[string]int{
+			"0  ": 3,
+			"1  ": 2,
+			"2  ": 1,
+			"3  ": 1,
+			"4  ": 1,
+			"5  ": 1,
+			"6  ": 1,
+			"7  ": 1,
+			"8  ": 2,
+			"9  ": 3,
+			"10 ": 4,
+			"11 ": 5,
+			"12 ": 5,
+			"13 ": 6,
+			"14 ": 5,
+			"15 ": 4,
+			"16 ": 3,
+			"17 ": 3,
+			"18 ": 4,
+			"19 ": 5,
+			"20 ": 6,
+			"21 ": 7,
+			"22 ": 6,
+			"23 ": 4,
+		}
+		hourPool = new(RandPool)
+		hourPool.LoadConfig(conf)
+	}
+	hh := hourPool.GetItem()
+	v, _ := strconv.Atoi(hh)
+	return v
+}
+
 // GetRandSourcePage 获取来源页   首页开屏,首页feed,搜索结果页,类目页,其他
 func GetRandSourcePage() string {
 	if sourcePagePool == nil {
@@ -151,4 +216,13 @@ func GetRandSourcePage() string {
 		sourcePagePool.LoadConfig(conf)
 	}
 	return sourcePagePool.GetItem()
+}
+
+func GetRandIpaddr4() string {
+	ip := fmt.Sprintf("%d.%d.%d.%d", GetRandInt(255), GetRandInt(255), GetRandInt(255), GetRandInt(255))
+	return ip
+}
+
+func GetRandDeviceID() int {
+	return 1000000 + GetRandInt(9000000)
 }

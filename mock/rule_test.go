@@ -109,3 +109,43 @@ func TestGetRandSourcePage(t *testing.T) {
 	}
 	logs.Info("result: %v", result)
 }
+
+func TestGetRandRemote(t *testing.T) {
+	result := make(map[string]int)
+
+	for i := 0; i < 10000; i++ {
+		v := GetRandRemote()
+		result[v] += 1
+	}
+	logs.Info("result: %v", result)
+}
+
+func TestGetRandHour(t *testing.T) {
+	result := make(map[int]int)
+
+	for i := 0; i < 10000; i++ {
+		v := GetRandHour()
+		result[v] += 1
+	}
+	logs.Info("result: %v", result)
+}
+
+func TestMockDataGenerator(t *testing.T) {
+	MockDataGenerator()
+}
+
+func TestOutputCsv(t *testing.T) {
+	OutputCsvDemo()
+}
+
+func TestGetRandIpaddr4(t *testing.T) {
+	logs.Info(GetRandIpaddr4())
+}
+
+func TestGetRandDeviceID(t *testing.T) {
+	logs.Info(GetRandDeviceID())
+}
+
+func TestGenerateNormalGuy(t *testing.T) {
+	logs.Info("%v", GenerateNormalGuy())
+}
