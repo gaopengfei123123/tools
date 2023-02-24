@@ -14,7 +14,7 @@ func MockDataGenerator() {
 }
 
 func OutputCsvDemo() {
-	f, err := os.Create("dictList.csv")
+	f, err := os.Create("demo.csv")
 	//关闭流
 	defer f.Close()
 	//写入UTF-8 格式
@@ -27,6 +27,29 @@ func OutputCsvDemo() {
 	//newContent = append(newContent, CSVItem{ID: 2, IP: "GPF"})
 	//保存文件流
 	err = gocsv.MarshalFile(list, f)
+	if err != nil {
+		logs.Info("err: %v", err)
+		logs.Info("end")
+		return
+	}
+}
+
+func OutPutCsv(total int) {
+	f, err := os.OpenFile("pv_data.csv", os.O_RDWR|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	//关闭流
+	defer f.Close()
+	//写入UTF-8 格式
+	f.WriteString("\xEF\xBB\xBF")
+
+	res := make([]CSVItem, 0, total*10)
+	for i := 0; i < total; i++ {
+		list := GenerateNormalGuy()
+
+		res = append(res, list...)
+	}
+
+	err = gocsv.Marshal(res, f)
+
 	if err != nil {
 		logs.Info("err: %v", err)
 		logs.Info("end")
@@ -47,6 +70,7 @@ type CSVItem struct {
 	ProductCity string // 商品所在地
 	IsRemote    string // 异地/本地
 	CreateTime  string // 点击时间
+	Hour        string // 所属小时
 }
 
 // GenerateNormalGuy 生成正常的日志
@@ -80,7 +104,6 @@ func GenerateNormalGuy() []CSVItem {
 			ID:          userID,
 			IP:          IP,
 			DeviceID:    fmt.Sprintf("%v", DeviceID),
-			CreateTime:  StartTime.Format("2006-01-02 15:04:05"),
 			City:        city,
 			Item:        GetRandItem(city),
 			Gender:      gender,
@@ -89,6 +112,8 @@ func GenerateNormalGuy() []CSVItem {
 			SourcePage:  sourcePage,
 			ProductCity: productCity,
 			IsRemote:    isRemote,
+			CreateTime:  StartTime.Format("2006-01-02 15:04:05"),
+			Hour:        StartTime.Format("15"),
 		}
 		result = append(result, tmp)
 	}

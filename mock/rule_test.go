@@ -135,7 +135,8 @@ func TestMockDataGenerator(t *testing.T) {
 }
 
 func TestOutputCsv(t *testing.T) {
-	OutputCsvDemo()
+	//OutputCsvDemo()
+	OutPutCsv(100)
 }
 
 func TestGetRandIpaddr4(t *testing.T) {

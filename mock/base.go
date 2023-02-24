@@ -116,9 +116,10 @@ func GetRandItem(city string) string {
 func GetRandGender() string {
 	if genderPool == nil {
 		conf := map[string]int{
-			"男性": 1,
-			"女性": 6,
-			"未知": 3,
+			"男性":  3,
+			"女性":  7,
+			"未知":  1,
+			"未说明": 3,
 		}
 		genderPool = new(RandPool)
 		genderPool.LoadConfig(conf)
@@ -169,30 +170,30 @@ func GetRandRemote() string {
 func GetRandHour() int {
 	if hourPool == nil {
 		conf := map[string]int{
-			"0  ": 3,
-			"1  ": 2,
-			"2  ": 1,
-			"3  ": 1,
-			"4  ": 1,
-			"5  ": 1,
-			"6  ": 1,
-			"7  ": 1,
-			"8  ": 2,
-			"9  ": 3,
-			"10 ": 4,
-			"11 ": 5,
-			"12 ": 5,
-			"13 ": 6,
-			"14 ": 5,
-			"15 ": 4,
-			"16 ": 3,
-			"17 ": 3,
-			"18 ": 4,
-			"19 ": 5,
-			"20 ": 6,
-			"21 ": 7,
-			"22 ": 6,
-			"23 ": 4,
+			"0":  3,
+			"1":  2,
+			"2":  1,
+			"3":  1,
+			"4":  1,
+			"5":  1,
+			"6":  1,
+			"7":  1,
+			"8":  2,
+			"9":  3,
+			"10": 4,
+			"11": 5,
+			"12": 5,
+			"13": 6,
+			"14": 5,
+			"15": 4,
+			"16": 3,
+			"17": 3,
+			"18": 4,
+			"19": 5,
+			"20": 6,
+			"21": 7,
+			"22": 6,
+			"23": 4,
 		}
 		hourPool = new(RandPool)
 		hourPool.LoadConfig(conf)
