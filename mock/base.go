@@ -55,7 +55,7 @@ func GetRandInt(max int) int {
 	return rand.Intn(max)
 }
 
-func GetRandCity(exclude ...string) string {
+func GetRandCity(fake bool, exclude ...string) string {
 	if cityPool == nil {
 		mp := map[string]int{
 			"北京": 100,
@@ -65,6 +65,18 @@ func GetRandCity(exclude ...string) string {
 			"深圳": 45,
 			"重庆": 40,
 			"成都": 30,
+		}
+
+		if fake {
+			mp = map[string]int{
+				"北京": 3,
+				"上海": 3,
+				"杭州": 2,
+				"广东": 1,
+				"深圳": 1,
+				"重庆": 1,
+				"成都": 1,
+			}
 		}
 
 		cityPool = new(RandPool)
@@ -141,12 +153,20 @@ func GetRandOrder() string {
 }
 
 // GetRandOS 获取随机平台
-func GetRandOS() string {
+func GetRandOS(fake bool) string {
 	if osPool == nil {
 		conf := map[string]int{
 			"IOS":     61,
 			"Android": 39,
 		}
+
+		if fake {
+			conf = map[string]int{
+				"IOS":     1,
+				"Android": 1,
+			}
+		}
+
 		osPool = new(RandPool)
 		osPool.LoadConfig(conf)
 	}
@@ -154,12 +174,20 @@ func GetRandOS() string {
 }
 
 // GetRandRemote  是否异地
-func GetRandRemote() string {
+func GetRandRemote(fake ...bool) string {
 	if remotePool == nil {
 		conf := map[string]int{
 			"本地": 6,
 			"异地": 4,
 		}
+
+		if len(fake) > 0 {
+			conf = map[string]int{
+				"本地": 1,
+				"异地": 1,
+			}
+		}
+
 		remotePool = new(RandPool)
 		remotePool.LoadConfig(conf)
 	}
@@ -167,7 +195,7 @@ func GetRandRemote() string {
 }
 
 // GetRandHour  获取随机的时间段
-func GetRandHour() int {
+func GetRandHour(fake bool) int {
 	if hourPool == nil {
 		conf := map[string]int{
 			"0":  3,
@@ -195,6 +223,36 @@ func GetRandHour() int {
 			"22": 6,
 			"23": 4,
 		}
+
+		if fake {
+			conf = map[string]int{
+				"0":  1,
+				"1":  1,
+				"2":  1,
+				"3":  1,
+				"4":  1,
+				"5":  1,
+				"6":  1,
+				"7":  1,
+				"8":  2,
+				"9":  3,
+				"10": 1,
+				"11": 1,
+				"12": 1,
+				"13": 1,
+				"14": 1,
+				"15": 1,
+				"16": 2,
+				"17": 3,
+				"18": 4,
+				"19": 5,
+				"20": 6,
+				"21": 7,
+				"22": 1,
+				"23": 1,
+			}
+		}
+
 		hourPool = new(RandPool)
 		hourPool.LoadConfig(conf)
 	}

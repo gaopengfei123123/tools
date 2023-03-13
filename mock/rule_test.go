@@ -54,7 +54,7 @@ func TestGetRandCity(t *testing.T) {
 	result := make(map[string]int)
 
 	for i := 0; i < 10000; i++ {
-		v := GetRandCity()
+		v := GetRandCity(false)
 		result[v] += 1
 	}
 	logs.Info("result: %v", result)
@@ -94,7 +94,7 @@ func TestGetRandOS(t *testing.T) {
 	result := make(map[string]int)
 
 	for i := 0; i < 10000; i++ {
-		v := GetRandOS()
+		v := GetRandOS(false)
 		result[v] += 1
 	}
 	logs.Info("result: %v", result)
@@ -124,7 +124,7 @@ func TestGetRandHour(t *testing.T) {
 	result := make(map[int]int)
 
 	for i := 0; i < 10000; i++ {
-		v := GetRandHour()
+		v := GetRandHour(false)
 		result[v] += 1
 	}
 	logs.Info("result: %v", result)
@@ -136,7 +136,7 @@ func TestMockDataGenerator(t *testing.T) {
 
 func TestOutputCsv(t *testing.T) {
 	//OutputCsvDemo()
-	OutPutCsv(100)
+	OutPutCsv(300)
 }
 
 func TestGetRandIpaddr4(t *testing.T) {
