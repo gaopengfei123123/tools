@@ -424,3 +424,19 @@ func TestEsQueryBuilder_ParseSearchResult(t *testing.T) {
 	jsb, _ := convert.JSONEncode(result)
 	logs.Info("result: %s, err: %v", jsb, err)
 }
+
+func TestEsQueryBuilder_GetStringQuery(t *testing.T) {
+	metricsList := []string{
+		MetricsLargeOrder,
+		MetricsJoinedClass,
+	}
+
+	params := map[string]interface{}{
+		"event": "siteYsPageView",
+	}
+	builder := new(EsQueryBuilder)
+	tmp := builder.LoadParams(nil, metricsList, params)
+
+	ss := tmp.GetStringQuery()
+	logs.Info("ss: %s", ss)
+}
