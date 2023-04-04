@@ -139,6 +139,10 @@ func TestOutputCsv(t *testing.T) {
 	OutPutCsv(300)
 }
 
+func TestOutPutCsvSummary(t *testing.T) {
+	OutPutCsvSummary(1000)
+}
+
 func TestGetRandIpaddr4(t *testing.T) {
 	logs.Info(GetRandIpaddr4())
 }
@@ -149,4 +153,14 @@ func TestGetRandDeviceID(t *testing.T) {
 
 func TestGenerateNormalGuy(t *testing.T) {
 	logs.Info("%v", GenerateNormalGuy())
+}
+
+func TestGetRandFake(t *testing.T) {
+	result := make(map[int]int)
+
+	for i := 0; i < 10000; i++ {
+		v := GetRandFake()
+		result[v] += 1
+	}
+	logs.Info("result: %v", result)
 }

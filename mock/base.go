@@ -15,6 +15,8 @@ var osPool *RandPool              // 手机平台
 var sourcePagePool *RandPool      // 来源页
 var remotePool *RandPool          // 是否异地
 var hourPool *RandPool            // 时间段
+var fakePool *RandPool            // 风险数据
+var fakeTypePool *RandPool        // 风控类型数据
 
 type RandPool struct {
 	OriList map[int]string    // 获取原始的配比
@@ -275,6 +277,36 @@ func GetRandSourcePage() string {
 		sourcePagePool.LoadConfig(conf)
 	}
 	return sourcePagePool.GetItem()
+}
+
+// GetRandFake 获取作弊标识
+func GetRandFake() int {
+	if fakePool == nil {
+		conf := map[string]int{
+			"1": 30,  // 存在风险数据
+			"0": 100, // 正常数据
+		}
+		fakePool = new(RandPool)
+		fakePool.LoadConfig(conf)
+	}
+	hh := fakePool.GetItem()
+	v, _ := strconv.Atoi(hh)
+	return v
+}
+
+// GetRandFakeType 获取作弊标识
+func GetRandFakeType() int {
+	if fakeTypePool == nil {
+		conf := map[string]int{
+			"1": 30, // 点击频次高
+			"2": 30, // 多 ip
+		}
+		fakeTypePool = new(RandPool)
+		fakeTypePool.LoadConfig(conf)
+	}
+	hh := fakeTypePool.GetItem()
+	v, _ := strconv.Atoi(hh)
+	return v
 }
 
 func GetRandIpaddr4() string {
