@@ -219,6 +219,10 @@ func TestRedisClient_GetCacheFuncKey(t *testing.T) {
 
 	key, err := cache.GetCacheFuncKey(Demo4, 3)
 	logs.Info("key: %v, err: %v", key, err)
+
+	cache.SetExpire(key, time.Second*5)
+	exp := cache.GetExpire(key)
+	logs.Info("exp: %v", exp.Seconds())
 }
 
 func TestEncode(t *testing.T) {
