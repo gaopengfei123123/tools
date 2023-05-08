@@ -261,11 +261,11 @@ func GenerateFakeSummary() CSVItemSummary {
 		IsRisk:      isRisk,            // 是否是风险数据
 		RiskType:    GetRandFakeType(), // 风险类别
 	}
+	result.IPCnt = GetRandInt(2)
 
 	// 正常数据
 	if isRisk == 0 {
 		result.TotalCnt = 1 + GetRandInt(15)
-		result.IPCnt = GetRandInt(2)
 		result.ItemCnt = GetRandInt(5)
 		if result.ItemCnt > result.TotalCnt {
 			result.ItemCnt = result.TotalCnt
@@ -281,6 +281,8 @@ func GenerateFakeSummary() CSVItemSummary {
 
 		return result
 	}
+
+	result.IsRemote = GetRandRemote(true)
 
 	switch result.RiskType {
 	case 1: // 点击频次高
@@ -300,10 +302,8 @@ func GenerateFakeSummary() CSVItemSummary {
 		result.AVGTime = int(cl)
 	case 2: // ip次数多
 		result.TotalCnt = 1 + GetRandInt(15)
-		result.IPCnt = 2 + GetRandInt(result.TotalCnt)
-		if result.IPCnt > result.TotalCnt {
-			result.IPCnt = result.TotalCnt
-		}
+		result.IPCnt = result.TotalCnt
+
 		result.ItemCnt = GetRandInt(5)
 		if result.ItemCnt > result.TotalCnt {
 			result.ItemCnt = result.TotalCnt
