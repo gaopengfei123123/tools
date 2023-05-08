@@ -211,6 +211,16 @@ func TestRedisClient_CacheFunc3(t *testing.T) {
 	logs.Info("result: %#+v, %#+v", res, err)
 }
 
+func TestRedisClient_GetCacheFuncKey(t *testing.T) {
+	cache := LoadRedisClient(getRedisClient())
+
+	result := cache.CacheFunc(Demo4, 3)
+	logs.Info("res: %#+v", result)
+
+	key, err := cache.GetCacheFuncKey(Demo4, 3)
+	logs.Info("key: %v, err: %v", key, err)
+}
+
 func TestEncode(t *testing.T) {
 	var dao bytes.Buffer
 
