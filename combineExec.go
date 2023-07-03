@@ -77,6 +77,17 @@ func BatchExec(task CallTask) (resultList []ResponseBody, err error) {
 		//result, err := CallFunc(task.TaskList[i])
 		// 这里开协程进行批量调用
 		go func(index int, task CallBody, res chan<- ResponseBody) {
+			// 如果执行超时, 则需要捕获 send on closed channel 的异常
+			defer func() {
+				if panicErr := recover(); panicErr != nil {
+					traceData := map[string]string{
+						"taskBody": fmt.Sprintf("%v", task),
+					}
+					printInnerLog(logs.LevelDebug, traceData, "work chan Err: %v", panicErr)
+					return
+				}
+			}()
+
 			result, resErr := CallFunc(task)
 			// 将结果和错误信息返回
 			res <- ResponseBody{
