@@ -225,6 +225,26 @@ func TestRedisClient_GetCacheFuncKey(t *testing.T) {
 	logs.Info("exp: %v", exp.Seconds())
 }
 
+// 设置缓存版本概念
+func TestRedisClient_SetExpire(t *testing.T) {
+	cache := LoadRedisClient(getRedisClient())
+
+	cache.SetExpire(GetFuncName(Demo4), time.Second*100, "v1")
+
+	exp := cache.GetExpire(GetFuncName(Demo4))
+
+	logs.Info("funcName: %v exp: %v", GetFuncName(Demo4), exp.Seconds())
+
+	//result := cache.CacheFunc(Demo4, 3)
+	//logs.Info("res: %#+v", result)
+	//
+	//key, err := cache.GetCacheFuncKey(Demo4, 3)
+	//logs.Info("key: %v, err: %v", key, err)
+	//
+	//exp := cache.GetExpire(key)
+	//logs.Info("exp: %v", exp.Seconds())
+}
+
 func TestEncode(t *testing.T) {
 	var dao bytes.Buffer
 

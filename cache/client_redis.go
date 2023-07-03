@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"github.com/astaxie/beego/logs"
 	"github.com/go-redis/redis/v8"
 	"sync"
@@ -15,6 +16,7 @@ import (
 type RedisClient struct {
 	client        *redis.Client
 	ExpireMap     sync.Map
+	ExpireVersion sync.Map // 先取 key 的版本, 再取对应版本的缓存时长
 	DefaultExpire time.Duration
 }
 
@@ -37,18 +39,32 @@ func LoadRedisClient(c *redis.Client, defaultExpire ...time.Duration) CommonDriv
 
 // GetExpire 获取配置的缓存时长
 func (c *RedisClient) GetExpire(k string) time.Duration {
-	exp, ok := c.ExpireMap.Load(k)
+	var exp interface{}
+	vk, ok := c.ExpireVersion.Load(k)
+	if !ok {
+		goto STEP2
+	}
+
+	exp, ok = c.ExpireMap.Load(vk)
 	if ok && exp != nil {
 		return exp.(time.Duration)
 	}
 
+STEP2:
 	// 如果不设置就默认缓存 1小时
 	return time.Second * 3600
 }
 
 // SetExpire 设置单个函数的缓存时长
-func (c *RedisClient) SetExpire(k string, expire time.Duration) CommonDrive {
-	c.ExpireMap.Store(k, expire)
+func (c *RedisClient) SetExpire(k string, expire time.Duration, version ...string) CommonDrive {
+	vers := "v1"
+	if len(version) > 0 {
+		vers = version[0]
+	}
+
+	keyV := fmt.Sprintf("%v_%v", k, vers)
+	c.ExpireVersion.Store(k, keyV)
+	c.ExpireMap.Store(keyV, expire)
 	return c
 }
 

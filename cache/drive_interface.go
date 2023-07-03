@@ -10,7 +10,7 @@ type CommonDrive interface {
 	Exist(k string) bool
 	CacheFunc(funcName interface{}, params ...interface{}) *CallFuncBody
 	DeleteFunc(funcName interface{}, params ...interface{}) bool
-	SetExpire(k string, exp time.Duration) CommonDrive
+	SetExpire(k string, exp time.Duration, version ...string) CommonDrive
 	GetExpire(k string) time.Duration
 	GetCacheFuncKey(funcName interface{}, params ...interface{}) (cacheKey string, err error)
 }
