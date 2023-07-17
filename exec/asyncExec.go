@@ -32,6 +32,7 @@ import (
 
 const StatusDone = 1
 const StatusWait = 0
+const StatusOvertime = 2
 
 // CallTask 发起并发执行任务
 type CallTask struct {
@@ -59,6 +60,10 @@ func (cb *CallBody) GetResult(returnItems ...interface{}) error {
 
 	if cb.Status == StatusWait {
 		return fmt.Errorf("func not exec yet, index: %v", cb.Index)
+	}
+
+	if cb.Status == StatusOvertime {
+		return fmt.Errorf("func exec overtime, index: %v", cb.Index)
 	}
 
 	return tools.InterfaceToResult(cb.Result, returnItems...)
@@ -189,6 +194,13 @@ func (task *CallTask) BatchExec() error {
 
 	// 并行读取结果
 	go func(max int) {
+		// 如果执行超时, 则需要捕获 send on closed channel 的异常
+		defer func() {
+			if panicErr := recover(); panicErr != nil {
+				return
+			}
+		}()
+
 		for i := 0; i < max; i++ {
 			res, ok := <-resultChan
 			if !ok {
@@ -209,6 +221,12 @@ LOOP:
 			break LOOP
 		case <-timeoutCtx.Done():
 			logs.Trace("timeout")
+			// 所有未执行/未返回结果的函数, 按超时处理
+			for i := range task.TaskList {
+				if task.TaskList[i].Status == StatusWait {
+					task.TaskList[i].Status = StatusOvertime
+				}
+			}
 			break LOOP
 		}
 	}
