@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/astaxie/beego/logs"
 	"github.com/go-mysql-org/go-mysql/canal"
-	"github.com/siddontang/go-log/log"
 )
 
 type MyEventHandler struct {
@@ -11,7 +11,7 @@ type MyEventHandler struct {
 
 func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 	//log.Infof("%s %v\n", e.Action, e.Rows)
-	log.Infof("Action: %s,  rows: %#+v", e.Action, e.Rows)
+	logs.Info("Action: %s,  rows: %#+v", e.Action, e.Rows)
 	return nil
 }
 
@@ -30,7 +30,7 @@ func main() {
 
 	c, err := canal.NewCanal(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logs.Error(err)
 	}
 
 	// Register a handler to handle RowsEvent

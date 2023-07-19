@@ -69,6 +69,7 @@ func CopyEsIndex(ctx context.Context, client *elastic.Client, src string, target
 	if err != nil {
 		err = errors.Errorf("Create Index Err:%v", err)
 	}
+	success = true
 	return
 }
 
