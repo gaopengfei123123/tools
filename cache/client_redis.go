@@ -35,6 +35,11 @@ func LoadRedisClient(c *redis.Client, defaultExpire ...time.Duration) CommonDriv
 	return client
 }
 
+// GetRedisClient 获取当前客户端
+func (c *RedisClient) GetRedisClient() *redis.Client {
+	return c.client
+}
+
 // GetExpire 获取配置的缓存时长
 func (c *RedisClient) GetExpire(k string) time.Duration {
 	exp, ok := c.ExpireMap.Load(k)

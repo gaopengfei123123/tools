@@ -1,6 +1,9 @@
 package cache
 
-import "time"
+import (
+	"github.com/go-redis/redis/v8"
+	"time"
+)
 
 // CommonDrive 统一缓存驱动接口
 type CommonDrive interface {
@@ -13,4 +16,5 @@ type CommonDrive interface {
 	SetExpire(k string, exp time.Duration) CommonDrive
 	GetExpire(k string) time.Duration
 	GetCacheFuncKey(funcName interface{}, params ...interface{}) (cacheKey string, err error)
+	GetRedisClient() *redis.Client
 }
