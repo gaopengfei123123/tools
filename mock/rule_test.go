@@ -134,11 +134,13 @@ func TestMockDataGenerator(t *testing.T) {
 	MockDataGenerator()
 }
 
+// 最终生成原始数据文档
 func TestOutputCsv(t *testing.T) {
 	//OutputCsvDemo()
 	OutPutCsv(300)
 }
 
+// 最终生成汇总数据文档
 func TestOutPutCsvSummary(t *testing.T) {
 	OutPutCsvSummary(1000)
 }
