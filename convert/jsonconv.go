@@ -3,6 +3,7 @@ package convert
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego/logs"
 	"log"
 	"regexp"
@@ -31,6 +32,17 @@ func JSONEncode(data interface{}, format ...bool) ([]byte, error) {
 	}
 
 	return json.Marshal(JsonSnakeCase{Value: data})
+}
+
+// 自动将json驼峰转下划线
+func demo() {
+	type Person struct {
+		HelloWold       string
+		LightWeightBaby string
+	}
+	var a = Person{HelloWold: "GPF", LightWeightBaby: "muscle"}
+	res, _ := json.Marshal(JsonSnakeCase{Value: a})
+	fmt.Printf("%s", res)
 }
 
 // JsonSnakeCase json struct 驼峰自动转下划线

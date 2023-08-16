@@ -77,6 +77,7 @@ func TestCallTask_BatchExec3(t *testing.T) {
 	}
 
 	task := &CallTask{}
+	task.MaxTime = time.Second * 2 // 设置最大超时时间 2s
 	task.AddTask(func1).AddTask(func2).AddTask(func3)
 
 	funcErr := task.BatchExec()

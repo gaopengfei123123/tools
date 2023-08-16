@@ -35,6 +35,11 @@ func LoadRedisClient(c *redis.Client, defaultExpire ...time.Duration) CommonDriv
 	return client
 }
 
+// GetRedisClient 获取当前客户端
+func (c *RedisClient) GetRedisClient() *redis.Client {
+	return c.client
+}
+
 // GetExpire 获取配置的缓存时长
 func (c *RedisClient) GetExpire(k string) time.Duration {
 	exp, ok := c.ExpireMap.Load(k)
@@ -107,6 +112,19 @@ func (c *RedisClient) DeleteFunc(funcName interface{}, params ...interface{}) bo
 	}
 
 	return c.Delete(cacheKey)
+}
+
+// GetCacheFuncKey 返回对应的缓存 key
+func (c *RedisClient) GetCacheFuncKey(funcName interface{}, params ...interface{}) (cacheKey string, err error) {
+	logs.Info("GetCacheFuncKey")
+	cb := &CallFuncBody{
+		FuncName: funcName,
+		Params:   params,
+		cache:    c,
+	}
+
+	cacheKey, _, err = cb.GetCacheKey()
+	return cacheKey, err
 }
 
 // CacheFunc 这里主要做的几件事, 1. 根据方法名和传参获取缓存, 注册返回值类型 key, 2. 查询是否存在对应 key 的缓存结果, 3. 返回缓存/返回执行结果
