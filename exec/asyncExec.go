@@ -197,6 +197,7 @@ func (task *CallTask) BatchExec() error {
 		// 如果执行超时, 则需要捕获 send on closed channel 的异常
 		defer func() {
 			if panicErr := recover(); panicErr != nil {
+				logs.Error("panicErr: %s", panicErr)
 				return
 			}
 		}()
