@@ -166,11 +166,11 @@ func GetTermsMetrics(ctx context.Context, termsList []string, metricsList []stri
 	}
 	// 获取 query
 	query := new(ParamsMapList).LoadConfig(scene, params).GenerateQuery()
-	return GetTermsMetricsWithQuery(ctx, termsList, metricsList, query, client, sceneName...)
+	return GetTermsMetricsWithQuery(ctx, params, termsList, metricsList, query, client, sceneName...)
 }
 
 // GetTermsMetricsWithQuery 以原生传参的方式, 获取聚合指标
-func GetTermsMetricsWithQuery(ctx context.Context, termsList []string, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result TermResult, err error) {
+func GetTermsMetricsWithQuery(ctx context.Context, params map[string]interface{}, termsList []string, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result TermResult, err error) {
 	if client == nil {
 		err = fmt.Errorf("esClient is nil")
 		return
@@ -188,11 +188,11 @@ func GetTermsMetricsWithQuery(ctx context.Context, termsList []string, metricsLi
 	result = TermResult{}
 
 	// 获取需要用到的索引名
-	esIndex := esconfig.GetEsIndex(scene)
+	esIndex := esconfig.GetEsIndex(params, scene)
 	service := client.Search().Index(esIndex)
 
 	// 递归组装 term 以及 agg
-	agg := BuildTermAgg(scene, termsList, metricsList)
+	agg := BuildTermAgg(scene, params, termsList, metricsList)
 
 	if len(termsList) == 0 {
 		return result, fmt.Errorf("请输入要聚合的字段")
@@ -217,12 +217,12 @@ func GetTermsMetricsWithQuery(ctx context.Context, termsList []string, metricsLi
 }
 
 // BatchGenerateMetricsAgg 将指标批量加载进去
-func BatchGenerateMetricsAgg(scene string, agg *elastic.TermsAggregation, metricsList []string, currentTerm string, isNested bool) *elastic.TermsAggregation {
+func BatchGenerateMetricsAgg(scene string, agg *elastic.TermsAggregation, params map[string]interface{}, metricsList []string, currentTerm string) *elastic.TermsAggregation {
 	if agg == nil || len(metricsList) == 0 {
 		return agg
 	}
 
-	//_, _, isNested := checkKeyNested(currentTerm)
+	_, _, isNested := checkKeyNested(currentTerm)
 
 	for i := 0; i < len(metricsList); i++ {
 		metricsName := metricsList[i]
@@ -235,17 +235,17 @@ func BatchGenerateMetricsAgg(scene string, agg *elastic.TermsAggregation, metric
 		if isNested {
 			// 回退一格到主文档
 			reverseAgg := elastic.NewReverseNestedAggregation()
-			reverseAgg.SubAggregation(metricsName, aggFunc())
+			reverseAgg.SubAggregation(metricsName, aggFunc(params))
 			agg.SubAggregation(metricsName, reverseAgg)
 		} else {
-			agg.SubAggregation(metricsName, aggFunc())
+			agg.SubAggregation(metricsName, aggFunc(params))
 		}
 	}
 	return agg
 }
 
 // BuildTermAgg 递归生成多级 term
-func BuildTermAgg(scene string, termList []string, metricsList []string, level ...int) elastic.Aggregation {
+func BuildTermAgg(scene string, params map[string]interface{}, termList []string, metricsList []string, level ...int) elastic.Aggregation {
 	var lv int
 	if len(level) != 0 {
 		lv = level[0]
@@ -265,10 +265,10 @@ func BuildTermAgg(scene string, termList []string, metricsList []string, level .
 	lv = lv + 1
 	// 这时候说明是最后一层term 了, 给它挂上指标
 	if lv == len(termList) {
-		agg = BatchGenerateMetricsAgg(scene, agg, metricsList, key, isNested)
+		agg = BatchGenerateMetricsAgg(scene, agg, params, metricsList, key)
 	}
 
-	childAgg := BuildTermAgg(scene, termList, metricsList, lv)
+	childAgg := BuildTermAgg(scene, params, termList, metricsList, lv)
 	if childAgg != nil {
 		// 这里是父级term, 需要看下级是否和自己path 一致, 一致就不生成 esconfig.SignChild
 		if lv < len(termList)+1 {

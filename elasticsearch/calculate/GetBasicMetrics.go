@@ -18,11 +18,11 @@ func GetBasicMetrics(ctx context.Context, metricsList []string, params map[strin
 
 	// 这里获取 query
 	query := new(ParamsMapList).LoadConfig(scene, params).GenerateQuery()
-	return GetBasicMetricsWithQuery(ctx, metricsList, query, client, sceneName...)
+	return GetBasicMetricsWithQuery(ctx, params, metricsList, query, client, sceneName...)
 }
 
 // GetBasicMetricsWithQuery 以原生传query 的方式获取值
-func GetBasicMetricsWithQuery(ctx context.Context, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result map[string]interface{}, err error) {
+func GetBasicMetricsWithQuery(ctx context.Context, params map[string]interface{}, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result map[string]interface{}, err error) {
 	if client == nil {
 		err = fmt.Errorf("esClient is nil")
 		return
@@ -42,7 +42,7 @@ func GetBasicMetricsWithQuery(ctx context.Context, metricsList []string, query e
 		return
 	}
 
-	esIndex := esconfig.GetEsIndex(scene)
+	esIndex := esconfig.GetEsIndex(params, scene)
 	service := client.Search().Index(esIndex)
 
 	// 这里将循环获取指标函数
@@ -52,7 +52,7 @@ func GetBasicMetricsWithQuery(ctx context.Context, metricsList []string, query e
 		if aggFunc == nil {
 			continue
 		}
-		service.Aggregation(name, aggFunc())
+		service.Aggregation(name, aggFunc(params))
 	}
 
 	service.Query(query)

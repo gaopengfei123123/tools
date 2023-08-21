@@ -20,7 +20,7 @@ func initWxRoomConfig() {
 }
 
 // MetricsLargeOrderCnt 测试用指标
-func MetricsRoomOrderFunc(currentTerm ...string) elastic.Aggregation {
+func MetricsRoomOrderFunc(params map[string]interface{}, currentTerm ...string) elastic.Aggregation {
 	termQuery := elastic.NewBoolQuery()
 
 	// 筛选条件

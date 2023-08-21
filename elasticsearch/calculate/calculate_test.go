@@ -84,7 +84,7 @@ func TestGetBasicMetricsWithQuery(t *testing.T) {
 		MetricsJoinedClass,
 	}
 
-	res, err := GetBasicMetricsWithQuery(nil, metrics, query, getEsCline())
+	res, err := GetBasicMetricsWithQuery(nil, nil, metrics, query, getEsCline())
 	logs.Info("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
@@ -138,7 +138,7 @@ func TestGetTermsMetricsWithQuery(t *testing.T) {
 		MetricsJoinedClass,
 	}
 
-	res, err := GetTermsMetricsWithQuery(nil, termsList, metrics, query, getEsCline())
+	res, err := GetTermsMetricsWithQuery(nil, nil, termsList, metrics, query, getEsCline())
 	logs.Info("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
@@ -194,7 +194,7 @@ func initConfig() {
 }
 
 // MetricsLargeOrderCnt 测试用指标
-func MetricsLargeOrderCnt(currentTerm ...string) elastic.Aggregation {
+func MetricsLargeOrderCnt(params map[string]interface{}, currentTerm ...string) elastic.Aggregation {
 	termQuery := elastic.NewBoolQuery()
 
 	// 筛选条件
@@ -208,7 +208,7 @@ func MetricsLargeOrderCnt(currentTerm ...string) elastic.Aggregation {
 	return metrics
 }
 
-func MetricsJoinedClassRoom(currentTerm ...string) elastic.Aggregation {
+func MetricsJoinedClassRoom(params map[string]interface{}, currentTerm ...string) elastic.Aggregation {
 	fieldPath := "join_classes"
 	field := "join_classes.is_display_group"
 
@@ -318,7 +318,7 @@ func TestEsQueryBuilder_ParseAgg(t *testing.T) {
 	// 初始化 builder
 	builder := new(EsQueryBuilder)
 
-	agg := builder.ParseAgg(termsList, metrics)
+	agg := builder.ParseAgg(nil, termsList, metrics)
 	result, _ := convert.JSONEncode(agg)
 	logs.Info("%s", result)
 }
@@ -340,7 +340,7 @@ func TestEsQueryBuilder_ParseAgg2(t *testing.T) {
 	// 初始化 builder
 	builder := new(EsQueryBuilder)
 
-	agg := builder.ParseAgg(termsList, metrics)
+	agg := builder.ParseAgg(nil, termsList, metrics)
 	result, _ := convert.JSONEncode(agg)
 	logs.Info("%s", result)
 }

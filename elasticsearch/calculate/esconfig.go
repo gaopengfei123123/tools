@@ -38,16 +38,18 @@ func init() {
 }
 
 type ESConfig struct {
-	EsIndex       string                      // 要用到的 es 文档
-	AggFuncList   map[string]AggFunc          // 存放 AggFunc 函数
-	HistogramList map[string]AggHistogramFunc // 存放直方图聚合指标
+	EsIndex        string                      // 要用到的 es 文档
+	AggFuncList    map[string]AggFunc          // 存放 AggFunc 函数
+	HistogramList  map[string]AggHistogramFunc // 存放直方图聚合指标
+	GetAggListFunc GetAggFunc
 	sync.Mutex
 }
 
 var esconfig *ESConfig
 
 // AggFunc 指标查询函数要求的格式
-type AggFunc func(currentTerm ...string) elastic.Aggregation
+type AggFunc func(params map[string]interface{}, currentTerm ...string) elastic.Aggregation
+type GetAggFunc func(metricName string, sceneName ...string) AggFunc // 外部注入的获取指标的方法, 如果没有的话, 就默认读取AggFuncList这里的指标
 
 // AggHistogramFunc 直方聚合查询
 type AggHistogramFunc func(aggList map[string]elastic.Aggregation) elastic.Aggregation
@@ -69,8 +71,21 @@ func SetMetricsAgg(metricName string, aggFuncList ...AggFunc) {
 	}
 }
 
+// SetMetricsAggFunc 设置获取指标信息的方法
+func SetMetricsAggFunc(fn GetAggFunc) {
+	esconfig.GetAggListFunc = fn
+}
+
 // GetMetricsAgg 获取注入的指标
 func (ec *ESConfig) GetMetricsAgg(metricName string, sceneName ...string) AggFunc {
+	// 优先使用函数方法
+	if ec.GetAggListFunc != nil {
+		agg := ec.GetAggListFunc(metricName, sceneName...)
+		if agg != nil {
+			return agg
+		}
+	}
+
 	ec.Lock()
 	defer ec.Unlock()
 	aggFunc, ok := ec.AggFuncList[metricName]
@@ -85,7 +100,7 @@ func SetEsIndex(index string) {
 	esconfig.EsIndex = index
 }
 
-func (ec *ESConfig) GetEsIndex(scene ...string) string {
+func (ec *ESConfig) GetEsIndex(params map[string]interface{}, scene ...string) string {
 	return ec.EsIndex
 }
 

@@ -65,11 +65,11 @@ func GetHistogramMetrics(ctx context.Context, histogramName string, metricsList 
 		scene = sceneName[0]
 	}
 	query := new(ParamsMapList).LoadConfig(scene, params).GenerateQuery()
-	return GetHistogramMetricsWithQuery(ctx, histogramName, metricsList, query, client, sceneName...)
+	return GetHistogramMetricsWithQuery(ctx, histogramName, params, metricsList, query, client, sceneName...)
 }
 
 // GetHistogramMetricsWithQuery 获取直方图, 参数由 query 格式传入
-func GetHistogramMetricsWithQuery(ctx context.Context, histogramName string, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result HistogramResult, err error) {
+func GetHistogramMetricsWithQuery(ctx context.Context, histogramName string, params map[string]interface{}, metricsList []string, query elastic.Query, client *elastic.Client, sceneName ...string) (result HistogramResult, err error) {
 	if client == nil {
 		err = fmt.Errorf("esClient is nil")
 		return
@@ -95,10 +95,10 @@ func GetHistogramMetricsWithQuery(ctx context.Context, histogramName string, met
 		MetricsList:   metricsList,
 	}
 
-	histogramAgg := BuildHistogramMetricsAgg(histogramName, metricsList, scene)
+	histogramAgg := BuildHistogramMetricsAgg(histogramName, params, metricsList, scene)
 
 	// 获取需要用到的索引名
-	esIndex := esconfig.GetEsIndex(scene)
+	esIndex := esconfig.GetEsIndex(params, scene)
 	service := client.Search().Index(esIndex)
 	service.Aggregation(histogramName, histogramAgg)
 	service.Query(query)
@@ -116,7 +116,7 @@ func GetHistogramMetricsWithQuery(ctx context.Context, histogramName string, met
 }
 
 // BuildHistogramMetricsAgg 构建直方图的agg
-func BuildHistogramMetricsAgg(histogramName string, metricsList []string, sceneName ...string) elastic.Aggregation {
+func BuildHistogramMetricsAgg(histogramName string, params map[string]interface{}, metricsList []string, sceneName ...string) elastic.Aggregation {
 	var scene string
 	if len(sceneName) != 0 {
 		scene = sceneName[0]
@@ -127,7 +127,7 @@ func BuildHistogramMetricsAgg(histogramName string, metricsList []string, sceneN
 	for i := range metricsList {
 		key := metricsList[i]
 		aggFunc := esconfig.GetMetricsAgg(key, scene)
-		metricsBodyList[key] = aggFunc()
+		metricsBodyList[key] = aggFunc(params)
 	}
 
 	return esconfig.GetHistogramAgg(histogramName, metricsBodyList)
