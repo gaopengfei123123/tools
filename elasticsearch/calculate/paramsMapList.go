@@ -239,6 +239,14 @@ func checkSubKey(key string) string {
 	return key
 }
 
+// 不作为 query 参数使用, 而是放在了agg指标当中
+func ignoreColumns(key string) bool {
+	if key == SignTimeRange {
+		return true
+	}
+	return false
+}
+
 func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.BoolQuery {
 	if len(ec.Conditions) == 0 {
 		return query
@@ -254,6 +262,13 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 
 	for i := 0; i < len(ec.Conditions); i++ {
 		cur := ec.Conditions[i]
+
+		// 过滤筛选字段
+		if ignoreColumns(cur.Key) {
+			jumpCnt += 1
+			continue
+		}
+
 		if cur.Optional > 0 && cur.Value == nil {
 			//logs.Trace("空的可选参数赋值 key: %v", cur.Key)
 			jumpCnt += 1
