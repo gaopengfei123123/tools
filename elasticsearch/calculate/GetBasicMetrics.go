@@ -104,6 +104,13 @@ func GetValueFromAggData(aggRes elastic.Aggregations, metricsName string) (resul
 		bucketKeyItem = bucketKeyItem2
 	}
 
+	// 检查是否存在 metric_filter_reverse
+	bucketKeyItem3, exist := bucketKeyItem.Terms(SignFilterReverse)
+	if exist {
+		// 存在filter 的情况下, 将这一层级提出来
+		bucketKeyItem = bucketKeyItem3
+	}
+
 	// 看 sdk 源码里, valueCount 和 sum 的实现是一样的, 所以这里不做区分, 统一返回 float64
 	terms, exist := bucketKeyItem.ValueCount(SignSingle)
 	if !exist || terms.Value == nil {

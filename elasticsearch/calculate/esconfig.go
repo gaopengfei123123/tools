@@ -6,14 +6,15 @@ import (
 )
 
 const (
-	SignAggList   = "metrics_list"
-	SignSingle    = "metric_data"
-	SignFilter    = "metric_filter"
-	SignTerms     = "metrics_terms"
-	SignChild     = "metrics_child"
-	SignNested    = "."              // nested类型字段连接方式  nested A下的字段B, 写成 A.B 实际按
-	SignObject    = ">"              // object类型字段链接方式  object A下的字段 B, 写成 A>B, 最终转换成 A.B
-	SignTimeRange = "agg_time_range" // 从外来参数传入到指标中的参数标识
+	SignAggList       = "metrics_list"
+	SignSingle        = "metric_data"
+	SignFilter        = "metric_filter"
+	SignFilterReverse = "metric_filter_reverse"
+	SignTerms         = "metrics_terms"
+	SignChild         = "metrics_child"
+	SignNested        = "."              // nested类型字段连接方式  nested A下的字段B, 写成 A.B 实际按
+	SignObject        = ">"              // object类型字段链接方式  object A下的字段 B, 写成 A>B, 最终转换成 A.B
+	SignTimeRange     = "agg_time_range" // 从外来参数传入到指标中的参数标识
 )
 
 const (
@@ -48,9 +49,13 @@ type ESConfig struct {
 
 var esconfig *ESConfig
 
+// 检测是否需要返回根目录
+var checkAggNeedReverse CheckAggReverseNest
+
 // AggFunc 指标查询函数要求的格式
 type AggFunc func(params map[string]interface{}, currentTerm ...string) elastic.Aggregation
-type GetAggFunc func(metricName string, sceneName ...string) AggFunc // 外部注入的获取指标的方法, 如果没有的话, 就默认读取AggFuncList这里的指标
+type GetAggFunc func(metricName string, sceneName ...string) AggFunc       // 外部注入的获取指标的方法, 如果没有的话, 就默认读取AggFuncList这里的指标
+type CheckAggReverseNest func(metricName string, sceneName ...string) bool // 检测函数是否需要反转 true的时候, 不执行 reverse_nest 操作
 
 // AggHistogramFunc 直方聚合查询
 type AggHistogramFunc func(aggList map[string]elastic.Aggregation) elastic.Aggregation
@@ -75,6 +80,19 @@ func SetMetricsAgg(metricName string, aggFuncList ...AggFunc) {
 // SetMetricsAggFunc 设置获取指标信息的方法
 func SetMetricsAggFunc(fn GetAggFunc) {
 	esconfig.GetAggListFunc = fn
+}
+
+func SetMetricsReverse(fn CheckAggReverseNest) {
+	checkAggNeedReverse = fn
+}
+
+// CheckAggNeeReverse 检测该指标是否就是需要在 nested 环境下使用 true 则不执行 reverse_nested
+func CheckAggNeeReverse(metricName string, sceneName ...string) bool {
+	if checkAggNeedReverse == nil {
+		return false
+	}
+
+	return checkAggNeedReverse(metricName, sceneName...)
 }
 
 // GetMetricsAgg 获取注入的指标

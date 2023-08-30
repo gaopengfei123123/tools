@@ -233,6 +233,10 @@ func BatchGenerateMetricsAgg(scene string, agg *elastic.TermsAggregation, params
 
 		// 如果是 nested 类型数据, 需要回退一格
 		if isNested {
+			if CheckAggNeeReverse(metricsName, scene) {
+				agg.SubAggregation(metricsName, aggFunc(params))
+				continue
+			}
 			// 回退一格到主文档
 			reverseAgg := elastic.NewReverseNestedAggregation()
 			reverseAgg.SubAggregation(metricsName, aggFunc(params))
