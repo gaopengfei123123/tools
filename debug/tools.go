@@ -20,8 +20,12 @@ func DD(f interface{}, v ...interface{}) {
 }
 
 func PrintJson(tag string, target interface{}, format ...bool) {
+	// 如果日志模式是非打印模式, 则不再解析 json
+	if logs.LevelDebug > logs.GetBeeLogger().GetLevel() {
+		return
+	}
 	b, _ := convert.JSONEncode(target, format...)
-	logs.Info("%s: %s", tag, b)
+	logs.Debug("%s: %s", tag, b)
 }
 
 // OutputJSON 输出json格式

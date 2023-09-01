@@ -1,2 +1,1 @@
-git tag -a v0.0.22 -m "更新 querybuilder 方法"
-git push origin --tags
+git tag -a v0.0.24 -m "微调函数" && git push origin --tags
