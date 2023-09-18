@@ -24,7 +24,7 @@ func TestRandPool_LoadConfig(t *testing.T) {
 
 	cp := new(RandPool)
 	cp.LoadConfig(mp)
-	logs.Info("cityPool: %v", cp)
+	logs.Trace("cityPool: %v", cp)
 }
 
 func TestRandPool_GetItem(t *testing.T) {
@@ -47,7 +47,7 @@ func TestRandPool_GetItem(t *testing.T) {
 		v := cp.GetItem()
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandCity(t *testing.T) {
@@ -57,7 +57,7 @@ func TestGetRandCity(t *testing.T) {
 		v := GetRandCity(false)
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandItem(t *testing.T) {
@@ -67,7 +67,7 @@ func TestGetRandItem(t *testing.T) {
 		v := GetRandItem("xxx")
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandGender(t *testing.T) {
@@ -77,7 +77,7 @@ func TestGetRandGender(t *testing.T) {
 		v := GetRandGender()
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandOrder(t *testing.T) {
@@ -87,7 +87,7 @@ func TestGetRandOrder(t *testing.T) {
 		v := GetRandOrder()
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandOS(t *testing.T) {
@@ -97,7 +97,7 @@ func TestGetRandOS(t *testing.T) {
 		v := GetRandOS(false)
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandSourcePage(t *testing.T) {
@@ -107,7 +107,7 @@ func TestGetRandSourcePage(t *testing.T) {
 		v := GetRandSourcePage()
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandRemote(t *testing.T) {
@@ -117,7 +117,7 @@ func TestGetRandRemote(t *testing.T) {
 		v := GetRandRemote()
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestGetRandHour(t *testing.T) {
@@ -127,7 +127,7 @@ func TestGetRandHour(t *testing.T) {
 		v := GetRandHour(false)
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }
 
 func TestMockDataGenerator(t *testing.T) {
@@ -146,15 +146,15 @@ func TestOutPutCsvSummary(t *testing.T) {
 }
 
 func TestGetRandIpaddr4(t *testing.T) {
-	logs.Info(GetRandIpaddr4())
+	logs.Trace(GetRandIpaddr4())
 }
 
 func TestGetRandDeviceID(t *testing.T) {
-	logs.Info(GetRandDeviceID())
+	logs.Trace(GetRandDeviceID())
 }
 
 func TestGenerateNormalGuy(t *testing.T) {
-	logs.Info("%v", GenerateNormalGuy())
+	logs.Trace("%v", GenerateNormalGuy())
 }
 
 func TestGetRandFake(t *testing.T) {
@@ -164,5 +164,5 @@ func TestGetRandFake(t *testing.T) {
 		v := GetRandFake()
 		result[v] += 1
 	}
-	logs.Info("result: %v", result)
+	logs.Trace("result: %v", result)
 }

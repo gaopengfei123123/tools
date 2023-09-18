@@ -35,7 +35,7 @@ func OutputJSON(k string, v ...interface{}) {
 }
 
 func Info(f interface{}, v ...interface{}) {
-	logs.Info(f, v...)
+	logs.Trace(f, v...)
 }
 
 func Debug(f interface{}, v ...interface{}) {

@@ -19,5 +19,5 @@ func TimeFormatInt32(tt int32, format ...string) (string, error) {
 func PrintJson(tag string, data interface{}, format ...bool) {
 	b, _ := convert.JSONEncode(data, format...)
 
-	logs.Info("%s: %s", tag, b)
+	logs.Trace("%s: %s", tag, b)
 }

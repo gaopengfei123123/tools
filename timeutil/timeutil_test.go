@@ -11,5 +11,5 @@ func TestTimeCnt(t *testing.T) {
 	time.Sleep(time.Second)
 
 	_, _, msg := fn()
-	logs.Info(msg)
+	logs.Trace(msg)
 }

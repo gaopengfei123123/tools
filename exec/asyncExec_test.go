@@ -22,9 +22,9 @@ func TestCallTask_BatchExec(t *testing.T) {
 		task.AddTask(func1)
 	}
 
-	logs.Info("task: %#+v", task)
+	logs.Trace("task: %#+v", task)
 	task.BatchExec()
-	logs.Info("task: %#+v", task)
+	logs.Trace("task: %#+v", task)
 }
 
 // 多协程执行示例
@@ -42,14 +42,14 @@ func TestCallTask_BatchExec2(t *testing.T) {
 		task.AddTask(func1)
 	}
 
-	logs.Info("task: %#+v", task)
+	logs.Trace("task: %#+v", task)
 	task.BatchExec()
-	logs.Info("task: %#+v", task)
+	logs.Trace("task: %#+v", task)
 
 	for i := range task.TaskList {
 		var msg string
 		err := task.TaskList[i].GetResult(&msg)
-		logs.Info("func result => index: %d, msg: %s, FuncErr: %v", i, msg, err)
+		logs.Trace("func result => index: %d, msg: %s, FuncErr: %v", i, msg, err)
 	}
 }
 
@@ -93,12 +93,12 @@ func TestCallTask_BatchExec3(t *testing.T) {
 			// DemoFunc 的返回值
 			var msg string
 			execErr := curResult.GetResult(&msg)
-			logs.Info("exec index: %d, execErr: %v res: %#+v", curResult.Index, execErr, msg)
+			logs.Trace("exec index: %d, execErr: %v res: %#+v", curResult.Index, execErr, msg)
 		} else {
 			var res map[string]string
 			var err error
 			execErr := curResult.GetResult(&res, &err)
-			logs.Info("exec index: %d, execErr: %v res: %#+v, %#+v", curResult.Index, execErr, res, err)
+			logs.Trace("exec index: %d, execErr: %v res: %#+v, %#+v", curResult.Index, execErr, res, err)
 		}
 	}
 

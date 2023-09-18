@@ -107,12 +107,12 @@ func (builder *EsQueryBuilder) GetTermsMetrics(ctx context.Context, client *elas
 		return
 	}
 	logs.Trace("GetPVTermsMetrics")
-	logs.Info("indexList: %v, termsList :%v, metricsList:%v", indexList, termsList, metricsList)
+	logs.Trace("indexList: %v, termsList :%v, metricsList:%v", indexList, termsList, metricsList)
 
 	// 将参数解析成 es query
 	requestQuery = builder.LoadParams(termsList, metricsList, params, sceneName...).GetStringQuery()
 
-	logs.Info("requestQuery", requestQuery)
+	logs.Trace("requestQuery", requestQuery)
 
 	// 请求 es
 	searchResult, err := client.Search(strings.Join(indexList, ",")).Source(requestQuery).Do(ctx)

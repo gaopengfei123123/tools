@@ -80,7 +80,7 @@ func TestLoadRedisClient(t *testing.T) {
 func TestRedisClient_Save(t *testing.T) {
 	redisClient := getRedisClient()
 	var tOffset int
-	logs.Info("resxxx: %#+v", tOffset)
+	logs.Trace("resxxx: %#+v", tOffset)
 	tmpConfig := TopicConfig{
 		//"topic1": map[int32]int64{
 		//	12: 34,
@@ -91,20 +91,20 @@ func TestRedisClient_Save(t *testing.T) {
 	}
 	tmpConfig = SetTopicConfig(tmpConfig, "topic1", 12, 15)
 	tmpConfig = SetTopicConfig(tmpConfig, "topic2", 12, 15)
-	logs.Info(tmpConfig)
+	logs.Trace(tmpConfig)
 	v, ok := GetTopicConfig(tmpConfig, "topic1", 12)
-	logs.Info("getTopicConfig: %v %v", v, ok)
+	logs.Trace("getTopicConfig: %v %v", v, ok)
 	v, ok = GetTopicConfig(tmpConfig, "topicxx", 12)
-	logs.Info("getTopicConfig: %v %v", v, ok)
+	logs.Trace("getTopicConfig: %v %v", v, ok)
 	err := LoadRedisClient(redisClient).Save("TestLoadRedisClientInfoXXX", tmpConfig, time.Second*300)
-	logs.Info("save err: %v", err)
+	logs.Trace("save err: %v", err)
 	//var resConfig TopicConfig
 	//err = LoadRedisClient(redisClient).Get("TestLoadRedisClientInfoXXX", &resConfig)
-	//logs.Info("resConfig: %#+v", resConfig)
+	//logs.Trace("resConfig: %#+v", resConfig)
 
 	res := TopicConfig{}
 	LoadRedisClient(redisClient).Get("TestLoadRedisClientInfoXXX", &res)
-	logs.Info("result: %v", res)
+	logs.Trace("result: %v", res)
 }
 
 func SetTopicConfig(conf TopicConfig, topic string, partition int32, offset int64) TopicConfig {
@@ -154,7 +154,7 @@ func TestCallFuncBody_GetResult(t *testing.T) {
 
 	var resultMsg string
 	cache.CacheFunc(Demo, "params xxx").GetResult(&resultMsg)
-	logs.Info("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo)), resultMsg)
+	logs.Trace("Func: Demo,  expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo)), resultMsg)
 
 	// 必须提前注册类型, 不然解不出来
 	gob.Register(&map[string]string{})
@@ -164,7 +164,7 @@ func TestCallFuncBody_GetResult(t *testing.T) {
 		"Name": "GPFXX",
 	}
 	cache.CacheFunc(Demo2, tmp).GetResult(&mp)
-	logs.Info("Func: Demo2,   expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo2)), mp)
+	logs.Trace("Func: Demo2,   expire: %v, result: %v", cache.GetExpire(GetFuncName(Demo2)), mp)
 }
 
 // 缓存复杂类型的数据测试
@@ -175,26 +175,26 @@ func TestCallFuncBody_GetResult2(t *testing.T) {
 	result = &DemoResult{}
 	gob.Register(result)
 	err := cache.CacheFunc(Demo3, int32(3)).GetResult(&result)
-	logs.Info("Func demo3, err: %v, result: %#+v", err, result)
+	logs.Trace("Func demo3, err: %v, result: %#+v", err, result)
 
 	tools.PrintJson("cache result", result)
 
 	result = Demo3(3)
-	logs.Info("NoCache: %#+v", result)
+	logs.Trace("NoCache: %#+v", result)
 }
 
 func TestRedisClient_DeleteFunc(t *testing.T) {
 	cache := LoadRedisClient(getRedisClient())
 	res := cache.DeleteFunc(Demo3, int32(3))
-	logs.Info("delete res: %v", res)
+	logs.Trace("delete res: %v", res)
 }
 
 func TestRedisClient_CacheFunc2(t *testing.T) {
 	m0 := reflect.TypeOf(Demo2)
 
 	for i := 0; i < m0.NumOut(); i++ {
-		logs.Info("返回值: %#+v", m0.Out(i))
-		logs.Info("索引: %v", m0.Out(i).String())
+		logs.Trace("返回值: %#+v", m0.Out(i))
+		logs.Trace("索引: %v", m0.Out(i).String())
 	}
 }
 
@@ -203,26 +203,26 @@ func TestRedisClient_CacheFunc2(t *testing.T) {
 func TestRedisClient_CacheFunc3(t *testing.T) {
 	cache := LoadRedisClient(getRedisClient())
 	result := cache.CacheFunc(Demo4, 3)
-	logs.Info("res: %#+v", result)
+	logs.Trace("res: %#+v", result)
 
 	var res int
 	var err *Error
 	result.GetResult(&res, &err)
-	logs.Info("result: %#+v, %#+v", res, err)
+	logs.Trace("result: %#+v, %#+v", res, err)
 }
 
 func TestRedisClient_GetCacheFuncKey(t *testing.T) {
 	cache := LoadRedisClient(getRedisClient())
 
 	result := cache.CacheFunc(Demo4, 3)
-	logs.Info("res: %#+v", result)
+	logs.Trace("res: %#+v", result)
 
 	key, err := cache.GetCacheFuncKey(Demo4, 3)
-	logs.Info("key: %v, err: %v", key, err)
+	logs.Trace("key: %v, err: %v", key, err)
 
 	cache.SetExpire(key, time.Second*5)
 	exp := cache.GetExpire(key)
-	logs.Info("exp: %v", exp.Seconds())
+	logs.Trace("exp: %v", exp.Seconds())
 }
 
 func TestEncode(t *testing.T) {
@@ -234,8 +234,8 @@ func TestEncode(t *testing.T) {
 	encoder := gob.NewEncoder(&dao)
 
 	err := encoder.Encode(tmp)
-	logs.Info("err: %v", err)
-	logs.Info("encode: %v", dao.String())
+	logs.Trace("err: %v", err)
+	logs.Trace("encode: %v", dao.String())
 }
 
 // 用来测试缓存的函数1

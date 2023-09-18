@@ -51,12 +51,12 @@ func TestDemo(t *testing.T) {
 			// DemoFunc 的返回值
 			var msg string
 			execErr := curResult.GetResult(&msg)
-			logs.Info("exec index: %d, execErr: %v res: %#+v", curResult.Index, execErr, msg)
+			logs.Trace("exec index: %d, execErr: %v res: %#+v", curResult.Index, execErr, msg)
 		} else {
 			var res map[string]string
 			var err error
 			execErr := curResult.GetResult(&res, &err)
-			logs.Info("exec index: %d, execErr: %v res: %#+v, %#+v", curResult.Index, execErr, res, err)
+			logs.Trace("exec index: %d, execErr: %v res: %#+v, %#+v", curResult.Index, execErr, res, err)
 		}
 	}
 

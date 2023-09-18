@@ -64,7 +64,7 @@ func (ti *TermResult) GetMapDataResult(outputTerm []int, termFilter FilterFunc) 
 	for _, curTermItem := range ti.Result {
 		if termFilter != nil && termFilter(curTermItem.Terms) {
 			// 因为命中了过滤条件, 不输出
-			logs.Info("触发命中: term: %v, filter: %v", curTermItem.Terms, termFilter)
+			logs.Trace("触发命中: term: %v, filter: %v", curTermItem.Terms, termFilter)
 			continue
 		}
 
@@ -112,7 +112,7 @@ func (ti *TermResult) LoopTermsFromAgg(aggRes *elastic.AggregationBucketKeyItems
 			copy(tmpColumn, tmpColumnValue) // 切片深拷贝, 避免内存共享的干扰 -- 一个 go 语言的暗坑
 
 			metricsData, _ := BatchGetValueFromAggData(bucket.Aggregations, ti.MetricsList)
-			//logs.Info("metricsData: %v, err: %v", metricsData, err)
+			//logs.Trace("metricsData: %v, err: %v", metricsData, err)
 			tmp := TermItem{
 				Terms: tmpColumn,
 				Data:  metricsData,
@@ -134,7 +134,7 @@ func (ti *TermResult) LoopTermsFromAgg(aggRes *elastic.AggregationBucketKeyItems
 				curKey := genTermKey(key)
 				tmpAgg, exist = bucket.Terms(curKey)
 			}
-			//logs.Info("tmpAgg: %s", tmpAgg)
+			//logs.Trace("tmpAgg: %s", tmpAgg)
 		} else {
 			curKey := genTermKey(key)
 
@@ -366,11 +366,11 @@ func BatchGetValueFromTerms(aggRes elastic.Aggregations, metricList []string, te
 	}
 	// 第一步传空, 后续递归叠加
 	err = result.LoopTermsFromAgg(agg, nil)
-	//logs.Info("err: %v", err)
-	//logs.Info("BatchGetValueFromTerms: %s", agg)
+	//logs.Trace("err: %v", err)
+	//logs.Trace("BatchGetValueFromTerms: %s", agg)
 	//
 	//b, _ := convert.JSONEncode(res)
-	//logs.Info("result: %s", b)
+	//logs.Trace("result: %s", b)
 	return result, err
 }
 
@@ -423,7 +423,7 @@ func (ti *TermResult) TermFilter(targetTerms TermItem, termFilter ...interface{}
 		}
 		target := fmt.Sprintf("%v", targetTerms.Terms[i])
 		filter := fmt.Sprintf("%v", termFilter[i])
-		logs.Info("target: %v, filter: %v", target, filter)
+		logs.Trace("target: %v, filter: %v", target, filter)
 		if target != filter {
 			return true
 		}

@@ -105,13 +105,13 @@ func GetSliceESIndexByTimeRange(indexName string, startTime time.Time, endTime t
 
 	end := endTime.AddDate(0, 1, -1)
 	for startTime.Unix() < end.Unix() {
-		//logs.Info("\n")
-		//logs.Info("start:%v", startTime)
-		//logs.Info("earliestTime: %v", GetEarliestDate().Format("200601"))
-		//logs.Info("curTime: %v", startTime.Format("200601"))
+		//logs.Trace("\n")
+		//logs.Trace("start:%v", startTime)
+		//logs.Trace("earliestTime: %v", GetEarliestDate().Format("200601"))
+		//logs.Trace("curTime: %v", startTime.Format("200601"))
 		// 如果是和分界时间同一个月的, 就再加个当月的索引
 		if GetEarliestDate().Format("200601") == startTime.Format("200601") {
-			//logs.Info("special start:%v", startTime)
+			//logs.Trace("special start:%v", startTime)
 			yyyymm := startTime.Format("200601")
 			tmpp := fmt.Sprintf("%s_%s", indexName, yyyymm)
 			if _, exist := existMap[tmpp]; !exist {
@@ -129,9 +129,9 @@ func GetSliceESIndexByTimeRange(indexName string, startTime time.Time, endTime t
 
 		tmp := GetCurrentSliceESIndex(indexName, startTime)
 		if _, ok := existMap[tmp]; ok {
-			//logs.Info("jump %v", startTime)
+			//logs.Trace("jump %v", startTime)
 			startTime = startTime.AddDate(0, 0, 27)
-			//logs.Info("jump TO %v", startTime)
+			//logs.Trace("jump TO %v", startTime)
 			continue
 		}
 		existMap[tmp] = struct{}{}

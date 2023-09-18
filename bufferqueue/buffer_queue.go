@@ -77,7 +77,7 @@ func (bf *BufferQueue) AddJob(msg interface{}) error {
 		return fmt.Errorf("please exec BufferQueue.")
 	}
 
-	logs.Info("job channel: %v", bf.job)
+	logs.Trace("job channel: %v", bf.job)
 	bf.job <- msg
 	return err
 }

@@ -80,7 +80,7 @@ func (pl *ParamsMapList) generateConfig(params map[string]interface{}) *ParamsMa
 		}
 		raw := pl.generateOrigin(key, v)
 		if raw == nil {
-			logs.Info("返回空值  key: %v, v: %v", key, v)
+			logs.Trace("返回空值  key: %v, v: %v", key, v)
 			continue
 		}
 		pl.OriginList[key] = raw
@@ -279,7 +279,7 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 
 		rangeQuery, isRange := checkRangeValue(cur.Key, cur.Value)
 
-		logs.Info("cur.Key: %v, isRange:%v", cur.Key, isRange)
+		logs.Trace("cur.Key: %v, isRange:%v", cur.Key, isRange)
 
 		if isRange {
 			cur.Type = QueryRange
@@ -392,7 +392,7 @@ func (eqc *EsQueryConfig) CombineParamsConfig(paramsConfig *ParamsMapList) {
 	// 把最后没配置上但是传进来的参数给拼到后面去
 	tmpList := paramsConfig.GenerateEsQueryConfig()
 	eqc.Conditions = append(eqc.Conditions, tmpList...)
-	logs.Info("CombineParamsConfig: %v", eqc.Conditions)
+	logs.Trace("CombineParamsConfig: %v", eqc.Conditions)
 }
 
 // LoadValueFromParams 从外部传入的 params 中获取参数
@@ -451,7 +451,7 @@ func (ec *EsQueryCondition) LoadConditionsFromParamsConfig(mapList map[string]bo
 // LoadValueFromParams 从外部传入的 params 中获取参数
 func (sc *SearchCondition) LoadValueFromParams(params map[string]interface{}) error {
 	karr := strings.Split(sc.Key, ".")
-	//logs.Info("LoadValueFromParams key: %v, karr: %v", sc.Key, karr)
+	//logs.Trace("LoadValueFromParams key: %v, karr: %v", sc.Key, karr)
 	if len(karr) == 0 || len(karr) > 2 {
 		return fmt.Errorf("key 命名错误: %v", sc.Key)
 	}

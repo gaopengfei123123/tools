@@ -10,7 +10,7 @@ import (
 )
 
 func MockDataGenerator() {
-	logs.Info("xxx")
+	logs.Trace("xxx")
 	return
 }
 
@@ -29,8 +29,8 @@ func OutputCsvDemo() {
 	//保存文件流
 	err = gocsv.MarshalFile(list, f)
 	if err != nil {
-		logs.Info("err: %v", err)
-		logs.Info("end")
+		logs.Trace("err: %v", err)
+		logs.Trace("end")
 		return
 	}
 }
@@ -53,8 +53,8 @@ func OutPutCsv(total int) {
 	err = gocsv.Marshal(res, f)
 
 	if err != nil {
-		logs.Info("err: %v", err)
-		logs.Info("end")
+		logs.Trace("err: %v", err)
+		logs.Trace("end")
 		return
 	}
 }
@@ -77,8 +77,8 @@ func OutPutCsvSummary(total int) {
 	err = gocsv.Marshal(res, f)
 
 	if err != nil {
-		logs.Info("err: %v", err)
-		logs.Info("end")
+		logs.Trace("err: %v", err)
+		logs.Trace("end")
 		return
 	}
 }

@@ -11,7 +11,7 @@ type MyEventHandler struct {
 
 func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 	//log.Infof("%s %v\n", e.Action, e.Rows)
-	logs.Info("Action: %s,  rows: %#+v", e.Action, e.Rows)
+	logs.Trace("Action: %s,  rows: %#+v", e.Action, e.Rows)
 	return nil
 }
 

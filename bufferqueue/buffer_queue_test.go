@@ -25,7 +25,7 @@ LOOP:
 			err := buffer.AddJob(fmt.Sprintf("a new Job, index: %d", i))
 			i += 1
 			if err != nil {
-				logs.Info("addJob err: %v", err)
+				logs.Trace("addJob err: %v", err)
 			}
 
 			//// 模拟主动退出的情况
@@ -33,13 +33,13 @@ LOOP:
 			//	cancel()
 			//}
 		case <-timeout:
-			logs.Info("timeout, stop")
+			logs.Trace("timeout, stop")
 			break LOOP
 		}
 	}
 	cancel()
 	time.Sleep(time.Second * 1)
-	logs.Info("finish")
+	logs.Trace("finish")
 }
 
 // 这里注入逻辑函数, 看一下执行效果
@@ -62,20 +62,20 @@ LOOP:
 			err := buffer.AddJob(fmt.Sprintf("a new Job, index: %d", i))
 			i += 1
 			if err != nil {
-				logs.Info("addJob err: %v", err)
+				logs.Trace("addJob err: %v", err)
 			}
 		case <-timeout:
-			logs.Info("timeout, stop")
+			logs.Trace("timeout, stop")
 			break LOOP
 		}
 	}
 	cancel()
 	time.Sleep(time.Second * 1)
-	logs.Info("finish")
+	logs.Trace("finish")
 }
 
 func demoFunction(message []interface{}) {
-	logs.Info("demoFunc: %v", message)
+	logs.Trace("demoFunc: %v", message)
 }
 
 func TestBufferQueue_AddJob(t *testing.T) {
@@ -83,7 +83,7 @@ func TestBufferQueue_AddJob(t *testing.T) {
 	buffer.Start(context.TODO())
 
 	err := buffer.AddJob("xxx")
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 }
 
 // 模拟主动退出
@@ -102,7 +102,7 @@ LOOP:
 			err := buffer.AddJob(fmt.Sprintf("a new Job, index: %d", i))
 			i += 1
 			if err != nil {
-				logs.Info("addJob err: %v", err)
+				logs.Trace("addJob err: %v", err)
 				break LOOP
 			}
 
@@ -111,11 +111,11 @@ LOOP:
 				buffer.Stop()
 			}
 		case <-timeout:
-			logs.Info("timeout, stop")
+			logs.Trace("timeout, stop")
 			break LOOP
 		}
 	}
 	cancel()
 	time.Sleep(time.Second * 1)
-	logs.Info("finish")
+	logs.Trace("finish")
 }

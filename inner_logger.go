@@ -13,7 +13,7 @@ func printInnerLog(level int, traceData map[string]string, msg string, v ...inte
 	}
 
 	//msg = fmt.Sprintf(msg, v...)
-	//logs.Info("level: %v, traceData: %+v, msg: %v", level, traceData, msg)
+	//logs.Trace("level: %v, traceData: %+v, msg: %v", level, traceData, msg)
 	return
 }
 

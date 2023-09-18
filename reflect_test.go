@@ -18,5 +18,5 @@ func TestInterfaceToResult(t *testing.T) {
 
 	err := InterfaceToResult(result, &item1, &item2)
 
-	logs.Info("item1: %#+v, item2: %#+v, err: %v", item1, item2, err)
+	logs.Trace("item1: %#+v, item2: %#+v, err: %v", item1, item2, err)
 }

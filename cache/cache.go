@@ -29,7 +29,7 @@ func Encode(v interface{}) ([]byte, error) {
 		v = vArr
 	}
 	enc := gob.NewEncoder(buf)
-	logs.Info("encode: %#+v", v)
+	logs.Trace("encode: %#+v", v)
 	if err := enc.Encode(v); err != nil {
 		return buf.Bytes(), err
 	}
@@ -57,19 +57,19 @@ func (cb *CallFuncBody) GetResult(returnItems ...interface{}) error {
 	if cb.Err != nil {
 		return cb.Err
 	}
-	logs.Info("getResult: %s", cb.Result)
+	logs.Trace("getResult: %s", cb.Result)
 
 	return tools.InterfaceToResult(cb.Result, returnItems...)
 }
 
 func (cb *CallFuncBody) GetCacheKey() (key string, funcName string, err error) {
 	paramsStr := fmt.Sprintf("%v", cb.Params)
-	logs.Info("paramsStr1: %s", paramsStr)
+	logs.Trace("paramsStr1: %s", paramsStr)
 	h := md5.New()
 	h.Write([]byte(paramsStr))
 	paramsStr = hex.EncodeToString(h.Sum(nil))
-	logs.Info("paramsStr2: %s", paramsStr)
-	//logs.Info("%v", GetFuncName(cb.FuncName))
+	logs.Trace("paramsStr2: %s", paramsStr)
+	//logs.Trace("%v", GetFuncName(cb.FuncName))
 	funcName = GetFuncName(cb.FuncName)
 	key = fmt.Sprintf("CacheFuncKey:%s:%v", GetFuncName(cb.FuncName), paramsStr)
 	return

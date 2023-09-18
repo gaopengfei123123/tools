@@ -88,7 +88,7 @@ func GetHistogramMetricsWithQuery(ctx context.Context, histogramName string, par
 	if len(sceneName) != 0 {
 		scene = sceneName[0]
 	}
-	logs.Info("scene: %v", scene)
+	logs.Trace("scene: %v", scene)
 
 	result = HistogramResult{
 		HistogramName: histogramName,
@@ -106,7 +106,7 @@ func GetHistogramMetricsWithQuery(ctx context.Context, histogramName string, par
 	searchResult, err := service.Size(0).Do(ctx)
 
 	b, _ := convert.JSONEncode(searchResult)
-	logs.Info("searchResult: %s, err: %v", b, err)
+	logs.Trace("searchResult: %s, err: %v", b, err)
 
 	if searchResult == nil || searchResult.Aggregations == nil {
 		return result, err

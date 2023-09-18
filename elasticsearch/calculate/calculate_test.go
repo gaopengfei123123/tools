@@ -33,10 +33,10 @@ func TestGetBasicMetrics(t *testing.T) {
 	}
 
 	res, err := GetBasicMetrics(nil, metrics, params, getEsCline())
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
-	logs.Info("res: \n%s", b)
+	logs.Trace("res: \n%s", b)
 }
 
 func TestGetTermsMetrics3(t *testing.T) {
@@ -47,7 +47,7 @@ func TestGetTermsMetrics3(t *testing.T) {
 
 	ctx, _ := termQuery.Source()
 	b, _ := convert.JSONEncode(ctx)
-	logs.Info("%s", b)
+	logs.Trace("%s", b)
 }
 
 func TestGetBasicMetrics2(t *testing.T) {
@@ -67,10 +67,10 @@ func TestGetBasicMetrics2(t *testing.T) {
 	}
 
 	res, err := GetBasicMetrics(nil, metrics, params, getEsCline())
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
-	logs.Info("res: \n%s", b)
+	logs.Trace("res: \n%s", b)
 }
 
 func TestGetBasicMetricsWithQuery(t *testing.T) {
@@ -85,10 +85,10 @@ func TestGetBasicMetricsWithQuery(t *testing.T) {
 	}
 
 	res, err := GetBasicMetricsWithQuery(nil, nil, metrics, query, getEsCline())
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
-	logs.Info("res: \n%s", b)
+	logs.Trace("res: \n%s", b)
 }
 
 func TestGetTermsMetrics(t *testing.T) {
@@ -113,10 +113,10 @@ func TestGetTermsMetrics(t *testing.T) {
 	}
 
 	res, err := GetTermsMetrics(nil, termsList, metrics, params, getEsCline())
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
-	logs.Info("res: \n%s", b)
+	logs.Trace("res: \n%s", b)
 }
 
 // 聚合指标查询1 一级字段+子文档字段
@@ -139,10 +139,10 @@ func TestGetTermsMetricsWithQuery(t *testing.T) {
 	}
 
 	res, err := GetTermsMetricsWithQuery(nil, nil, termsList, metrics, query, getEsCline())
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
-	logs.Info("res: \n%s", b)
+	logs.Trace("res: \n%s", b)
 }
 
 // 测试获取直方图示例
@@ -165,10 +165,10 @@ func TestGetHistogramMetrics(t *testing.T) {
 	}
 
 	res, err := GetHistogramMetrics(nil, hisName, metrics, params, getEsCline())
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 
 	b, _ := convert.JSONEncode(res)
-	logs.Info("res: \n%s", b)
+	logs.Trace("res: \n%s", b)
 }
 
 // 提前注入指标配置
@@ -265,7 +265,7 @@ func TestEsQueryBuilder_LoadParams(t *testing.T) {
 	builder := new(EsQueryBuilder)
 	// 将参数解析成 es query
 	requestQuery := builder.LoadParams(termsList, metricsList, params).GetStringQuery()
-	logs.Info("requestQuery: %v", requestQuery)
+	logs.Trace("requestQuery: %v", requestQuery)
 }
 
 // builder 解析器
@@ -281,7 +281,7 @@ func TestEsQueryBuilder_LoadParams2(t *testing.T) {
 	builder := new(EsQueryBuilder)
 	// 将参数解析成 es query
 	requestQuery := builder.LoadParams(termsList, metricsList, params).GetStringQuery()
-	logs.Info("requestQuery: %v", requestQuery)
+	logs.Trace("requestQuery: %v", requestQuery)
 }
 
 // 解析query
@@ -298,7 +298,7 @@ func TestEsQueryBuilder_ParseQuery(t *testing.T) {
 
 	query := builder.ParseQuery(params)
 	result, _ := convert.JSONEncode(query)
-	logs.Info("%s", result)
+	logs.Trace("%s", result)
 }
 
 // 解析agg
@@ -320,7 +320,7 @@ func TestEsQueryBuilder_ParseAgg(t *testing.T) {
 
 	agg := builder.ParseAgg(nil, termsList, metrics)
 	result, _ := convert.JSONEncode(agg)
-	logs.Info("%s", result)
+	logs.Trace("%s", result)
 }
 
 func TestEsQueryBuilder_ParseAgg2(t *testing.T) {
@@ -342,7 +342,7 @@ func TestEsQueryBuilder_ParseAgg2(t *testing.T) {
 
 	agg := builder.ParseAgg(nil, termsList, metrics)
 	result, _ := convert.JSONEncode(agg)
-	logs.Info("%s", result)
+	logs.Trace("%s", result)
 }
 
 func TestEsQueryBuilder_ParseParamsToQuery(t *testing.T) {
@@ -369,7 +369,7 @@ func TestEsQueryBuilder_ParseParamsToQuery(t *testing.T) {
 
 	query := builder.ParseParamsToQuery(termsList, metrics, params)
 	result, _ := convert.JSONEncode(query)
-	logs.Info("%s", result)
+	logs.Trace("%s", result)
 }
 
 // 模拟params 传空的情况
@@ -397,7 +397,7 @@ func TestEsQueryBuilder_ParseParamsToQuery2(t *testing.T) {
 
 	query := builder.ParseParamsToQuery(termsList, metrics, params)
 	result, _ := convert.JSONEncode(query)
-	logs.Info("%s", result)
+	logs.Trace("%s", result)
 }
 
 // builder 解析器
@@ -422,7 +422,7 @@ func TestEsQueryBuilder_ParseSearchResult(t *testing.T) {
 	// 解析搜索结果
 	result, err := builder.ParseSearchResult(searchResult)
 	jsb, _ := convert.JSONEncode(result)
-	logs.Info("result: %s, err: %v", jsb, err)
+	logs.Trace("result: %s, err: %v", jsb, err)
 }
 
 func TestEsQueryBuilder_GetStringQuery(t *testing.T) {
@@ -438,5 +438,5 @@ func TestEsQueryBuilder_GetStringQuery(t *testing.T) {
 	tmp := builder.LoadParams(nil, metricsList, params)
 
 	ss := tmp.GetStringQuery()
-	logs.Info("ss: %s", ss)
+	logs.Trace("ss: %s", ss)
 }

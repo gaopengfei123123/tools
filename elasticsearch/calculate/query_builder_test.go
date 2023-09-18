@@ -41,7 +41,7 @@ func GetAllAggFunc(metricName string, sceneName ...string) AggFunc {
 }
 
 func GetConversationMetricsAgg(metricName string, sceneName ...string) AggFunc {
-	logs.Info("GetConversationMetricsAgg, metricName:%s, sceneName: %v", metricName, sceneName)
+	logs.Trace("GetConversationMetricsAgg, metricName:%s, sceneName: %v", metricName, sceneName)
 
 	switch metricName {
 	case ConversationMetricsConversationCnt:
@@ -85,6 +85,6 @@ func TestGetConversationMetricsAgg(t *testing.T) {
 	result, _, err := builder.GetTermsMetrics(ctx, client, indexList, termsList, metrics, params, SceneConversation)
 
 	debug.PrintJson("result", result, true)
-	logs.Info("err: %v", err)
+	logs.Trace("err: %v", err)
 
 }

@@ -71,7 +71,7 @@ func (cb *CallBody) GetResult(returnItems ...interface{}) error {
 
 // Worker 工作线程
 func Worker(ctx context.Context, jobs <-chan CallBody, result chan<- CallBody) {
-	logs.Info("start worker, ctx index: %v", ctx.Value("workIndex"))
+	logs.Trace("start worker, ctx index: %v", ctx.Value("workIndex"))
 LOOP:
 	for {
 		select {

@@ -58,9 +58,9 @@ func (c *RedisClient) SetExpire(k string, expire time.Duration) CommonDrive {
 }
 
 func (c *RedisClient) Save(k string, v interface{}, expire time.Duration) error {
-	logs.Info("save")
+	logs.Trace("save")
 	b, err := Encode(v)
-	logs.Info("saveErr: %v", err)
+	logs.Trace("saveErr: %v", err)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (c *RedisClient) Save(k string, v interface{}, expire time.Duration) error 
 }
 
 func (c *RedisClient) Get(k string, target interface{}) error {
-	logs.Info("Get")
+	logs.Trace("Get")
 	val, err := c.client.Get(c.client.Context(), k).Result()
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (c *RedisClient) Get(k string, target interface{}) error {
 }
 
 func (c *RedisClient) Delete(k string) bool {
-	logs.Info("Delete: %v", k)
+	logs.Trace("Delete: %v", k)
 	i, err := c.client.Del(c.client.Context(), k).Result()
 	if err != nil || i <= 0 {
 		return false
@@ -88,7 +88,7 @@ func (c *RedisClient) Delete(k string) bool {
 }
 
 func (c *RedisClient) Exist(k string) bool {
-	logs.Info("Exist %v", k)
+	logs.Trace("Exist %v", k)
 	i, err := c.client.Exists(c.client.Context(), k).Result()
 	if err != nil || i <= 0 {
 		return false
@@ -98,7 +98,7 @@ func (c *RedisClient) Exist(k string) bool {
 
 // DeleteFunc 删除对应的函数结果缓存
 func (c *RedisClient) DeleteFunc(funcName interface{}, params ...interface{}) bool {
-	logs.Info("DeleteFunc")
+	logs.Trace("DeleteFunc")
 	cb := &CallFuncBody{
 		FuncName: funcName,
 		Params:   params,
@@ -116,7 +116,7 @@ func (c *RedisClient) DeleteFunc(funcName interface{}, params ...interface{}) bo
 
 // GetCacheFuncKey 返回对应的缓存 key
 func (c *RedisClient) GetCacheFuncKey(funcName interface{}, params ...interface{}) (cacheKey string, err error) {
-	logs.Info("GetCacheFuncKey")
+	logs.Trace("GetCacheFuncKey")
 	cb := &CallFuncBody{
 		FuncName: funcName,
 		Params:   params,
@@ -129,7 +129,7 @@ func (c *RedisClient) GetCacheFuncKey(funcName interface{}, params ...interface{
 
 // CacheFunc 这里主要做的几件事, 1. 根据方法名和传参获取缓存, 注册返回值类型 key, 2. 查询是否存在对应 key 的缓存结果, 3. 返回缓存/返回执行结果
 func (c *RedisClient) CacheFunc(funcName interface{}, params ...interface{}) *CallFuncBody {
-	logs.Info("CacheFunc")
+	logs.Trace("CacheFunc")
 	cb := &CallFuncBody{
 		FuncName: funcName,
 		Params:   params,
@@ -156,7 +156,7 @@ func (c *RedisClient) CacheFunc(funcName interface{}, params ...interface{}) *Ca
 
 STEP1:
 	res, err := CallFunc(*cb)
-	logs.Info("notCache result: %v", res)
+	logs.Trace("notCache result: %v", res)
 	if err != nil {
 		cb.Err = err
 		return cb
