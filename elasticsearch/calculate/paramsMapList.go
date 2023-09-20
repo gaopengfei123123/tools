@@ -297,12 +297,12 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 
 		switch cur.Type {
 		case QueryRange:
-			tmpQuery = tmpQuery.Must(rangeQuery)
+			tmpQuery = tmpQuery.Filter(rangeQuery)
 		case QueryMust:
 			if isMulti {
-				tmpQuery = tmpQuery.Must(elastic.NewTermsQuery(cur.Key, terms...))
+				tmpQuery = tmpQuery.Filter(elastic.NewTermsQuery(cur.Key, terms...))
 			} else {
-				tmpQuery = tmpQuery.Must(elastic.NewTermQuery(cur.Key, cur.Value))
+				tmpQuery = tmpQuery.Filter(elastic.NewTermQuery(cur.Key, cur.Value))
 			}
 		case QueryMustMulti:
 			v := strings.Split(cur.Value.(string), ",")
@@ -310,7 +310,7 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 			for _, vv := range v {
 				tmpI = append(tmpI, vv)
 			}
-			tmpQuery = tmpQuery.Must(elastic.NewTermsQuery(cur.Key, tmpI...))
+			tmpQuery = tmpQuery.Filter(elastic.NewTermsQuery(cur.Key, tmpI...))
 		case QueryMustNot:
 			if isMulti {
 				tmpQuery = tmpQuery.MustNot(elastic.NewTermsQuery(cur.Key, terms...))
@@ -326,7 +326,7 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 			tmpQuery = tmpQuery.MustNot(elastic.NewTermsQuery(cur.Key, tmpI...))
 		default:
 			// 默认走 term
-			tmpQuery = tmpQuery.Must(elastic.NewTermQuery(cur.Key, cur.Value))
+			tmpQuery = tmpQuery.Filter(elastic.NewTermQuery(cur.Key, cur.Value))
 		}
 	}
 
@@ -334,7 +334,7 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 		// 说明没有完全略过, 里面的参数还要继续用
 		if jumpCnt < maxCnt {
 			q := elastic.NewNestedQuery(ec.Path, tmpQuery)
-			query.Must(q)
+			query.Filter(q)
 		}
 	}
 
