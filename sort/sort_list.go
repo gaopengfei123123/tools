@@ -66,11 +66,6 @@ func (sor *SortedList) GroupSorted(group string, column string, orderDesc bool) 
 		tmpSortList := new(SortedList)
 		tmpSortList.LoadData(curList).Sorted(column, orderDesc)
 
-		//debug.PrintJson("tmpListSort", tmpSortList)
-
-		//for j := 0; j < len(tmpSortList.List); j++ {
-		//	resultList = append(resultList, tmpSortList.List[j])
-		//}
 		resultList = append(resultList, tmpSortList.List...)
 	}
 
