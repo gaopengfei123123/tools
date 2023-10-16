@@ -40,10 +40,11 @@ func init() {
 }
 
 type ESConfig struct {
-	EsIndex        string                      // 要用到的 es 文档
-	AggFuncList    map[string]AggFunc          // 存放 AggFunc 函数
-	HistogramList  map[string]AggHistogramFunc // 存放直方图聚合指标
-	GetAggListFunc GetAggFunc
+	EsIndex         string                      // 要用到的 es 文档
+	AggFuncList     map[string]AggFunc          // 存放 AggFunc 函数
+	HistogramList   map[string]AggHistogramFunc // 存放直方图聚合指标
+	GetAggListFunc  GetAggFunc
+	ESIndexNameFunc ESIndexFunc
 	sync.Mutex
 }
 
@@ -56,6 +57,7 @@ var checkAggNeedReverse CheckAggReverseNest
 type AggFunc func(params map[string]interface{}, currentTerm ...string) elastic.Aggregation
 type GetAggFunc func(metricName string, sceneName ...string) AggFunc       // 外部注入的获取指标的方法, 如果没有的话, 就默认读取AggFuncList这里的指标
 type CheckAggReverseNest func(metricName string, sceneName ...string) bool // 检测函数是否需要反转 true的时候, 不执行 reverse_nest 操作
+type ESIndexFunc func(params map[string]interface{}, sceneName ...string) string
 
 // AggHistogramFunc 直方聚合查询
 type AggHistogramFunc func(aggList map[string]elastic.Aggregation) elastic.Aggregation
@@ -84,6 +86,11 @@ func SetMetricsAggFunc(fn GetAggFunc) {
 
 func SetMetricsReverse(fn CheckAggReverseNest) {
 	checkAggNeedReverse = fn
+}
+
+// SetESIndexNameFunc 设置默认的索引
+func SetESIndexNameFunc(fn ESIndexFunc) {
+	esconfig.ESIndexNameFunc = fn
 }
 
 // CheckAggNeeReverse 检测该指标是否就是需要在 nested 环境下使用 true 则不执行 reverse_nested
@@ -120,6 +127,12 @@ func SetEsIndex(index string) {
 }
 
 func (ec *ESConfig) GetEsIndex(params map[string]interface{}, scene ...string) string {
+	if ec.ESIndexNameFunc != nil {
+		idx := ec.ESIndexNameFunc(params, scene...)
+		if idx != "" {
+			return idx
+		}
+	}
 	return ec.EsIndex
 }
 
