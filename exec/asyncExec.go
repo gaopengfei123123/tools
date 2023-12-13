@@ -71,7 +71,16 @@ func (cb *CallBody) GetResult(returnItems ...interface{}) error {
 
 // Worker 工作线程
 func Worker(ctx context.Context, jobs <-chan CallBody, result chan<- CallBody) {
+	// 如果执行超时, 则需要捕获 send on closed channel 的异常
+	defer func() {
+		if panicErr := recover(); panicErr != nil {
+			logs.Error("ctx index: %v, panicErr: %s", ctx.Value("workIndex"), panicErr)
+			return
+		}
+	}()
+
 	logs.Trace("start worker, ctx index: %v", ctx.Value("workIndex"))
+
 LOOP:
 	for {
 		select {
