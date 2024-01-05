@@ -117,3 +117,14 @@ func DemoFunc2(p1, p2, p3 string) (res map[string]string, err error) {
 	res["p3"] = p3
 	return
 }
+
+func TestFuncWithTimeout(t *testing.T) {
+	var msg string
+
+	err := FuncWithTimeout(time.Second*2, DemoFunc, "hello world", 1).GetResult(&msg)
+	logs.Info("err: %v, result: %v", err, msg)
+
+	var msg2 string
+	err = FuncWithTimeout(time.Second*2, DemoFunc, "hello world", 3).GetResult(&msg2)
+	logs.Info("err: %v, result: %v", err, msg2)
+}
