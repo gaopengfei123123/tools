@@ -115,10 +115,26 @@ func StructAssign(binding interface{}, value interface{}) {
 	bVal := reflect.ValueOf(binding).Elem() //获取reflect.Type类型
 	vVal := reflect.ValueOf(value).Elem()   //获取reflect.Type类型
 	vTypeOfT := vVal.Type()
+
+	// 目前有个结构体嵌套的问题, 先不处理
+	//// 获取赋值的字段名和偏移量字典, 规避下n^2的问题
+	//bValMap := make(map[string]int)
+	//for i := 0; i < bVal.NumField(); i++ {
+	//	if bVal.Field(i).IsValid() && bVal.Field(i).CanSet() {
+	//		name := bVal.Type().Field(i).Name
+	//		bValMap[name] = i
+	//	}
+	//}
+
 	for i := 0; i < vVal.NumField(); i++ {
 		// 在要修改的结构体中查询有数据结构体中相同属性的字段，有则修改其值
 		name := vTypeOfT.Field(i).Name
-		if ok := bVal.FieldByName(name).IsValid(); ok {
+
+		//if index, ok := bValMap[name]; ok {
+		//	bVal.Field(index).Set(reflect.ValueOf(vVal.Field(i).Interface()))
+		//}
+
+		if bVal.FieldByName(name).IsValid() && bVal.FieldByName(name).CanSet() {
 			bVal.FieldByName(name).Set(reflect.ValueOf(vVal.Field(i).Interface()))
 		}
 	}
