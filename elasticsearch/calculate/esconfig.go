@@ -29,7 +29,9 @@ const (
 	QueryMustMulti    = "mustMulti"
 	QueryMustNot      = "MustNot"
 	QueryMustNotMulti = "mustNotMulti"
-	SignNotNull       = "NOT_NULL" // 非空标识符
+	SignNotNull       = "NOT_NULL"     // 非空标识符
+	SignMustNot       = "MUST_NOT"     // 标记必须非空
+	SignExist         = "COLUMN_EXIST" // 标记字段必须存在
 
 	MaxSize = 10000000 // 聚合 terms 的时候的最大数量
 )

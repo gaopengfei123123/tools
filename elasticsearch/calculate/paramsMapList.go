@@ -200,12 +200,12 @@ func getMultiTerms(value interface{}) (terms []interface{}, isMulti bool) {
 }
 
 // 检测是否是范围类型的数值
-func checkRangeValue(key string, value interface{}) (rangeQuery *elastic.RangeQuery, isRange bool) {
+func checkRangeValue(key string, value interface{}) (isRange bool, rangeQuery *elastic.RangeQuery) {
 	valueArr, ok := value.([]interface{})
 	if ok && len(valueArr) == 2 { // 如果恰好是两个值得数组, 则说明是range 类型的
 		isRange = true
 	} else {
-		return nil, false
+		return false, nil
 	}
 	query := elastic.NewRangeQuery(key)
 	if valueArr[0] != nil {
@@ -215,7 +215,31 @@ func checkRangeValue(key string, value interface{}) (rangeQuery *elastic.RangeQu
 	if valueArr[1] != nil {
 		query.Lte(valueArr[1])
 	}
-	return query, isRange
+	return isRange, query
+}
+
+// 检测是否是取反类型的数值
+func checkMustNotValue(key string, value interface{}) (isMustNot bool, query elastic.Query) {
+	valueArr, ok := value.([]interface{})
+	if !ok || len(valueArr) < 2 { // 需要传入的参数为 interface{} 数组, 且第一个参数必须是
+		return
+	}
+
+	fistSign := fmt.Sprintf("%v", valueArr[0])
+	if fistSign != SignMustNot {
+		return
+	}
+	isMustNot = true
+
+	valueArr = valueArr[1:]
+
+	if len(valueArr) == 1 && fmt.Sprintf("%v", valueArr[0]) == SignExist {
+		query = elastic.NewExistsQuery(key)
+		return isMustNot, query
+	}
+
+	query = elastic.NewTermsQuery(key, valueArr...)
+	return
 }
 
 func checkNotNullValue(key string, value interface{}) bool {
@@ -277,12 +301,16 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 
 		terms, isMulti := getMultiTerms(cur.Value)
 
-		rangeQuery, isRange := checkRangeValue(cur.Key, cur.Value)
-
-		logs.Trace("cur.Key: %v, isRange:%v", cur.Key, isRange)
-
+		// 检测范围查询
+		isRange, rangeQuery := checkRangeValue(cur.Key, cur.Value)
 		if isRange {
 			cur.Type = QueryRange
+		}
+
+		// 检测是否包含 MUST_NOT 开头的参数
+		isMustNot, mustNotQuery := checkMustNotValue(cur.Key, cur.Value)
+		if isMustNot {
+			cur.Type = QueryMustNot
 		}
 
 		// 检测是否要求非空
@@ -312,6 +340,10 @@ func (ec *EsQueryCondition) BuildWithQuery(query *elastic.BoolQuery) *elastic.Bo
 			}
 			tmpQuery = tmpQuery.Filter(elastic.NewTermsQuery(cur.Key, tmpI...))
 		case QueryMustNot:
+			if mustNotQuery != nil {
+				tmpQuery = tmpQuery.MustNot(mustNotQuery)
+				break
+			}
 			if isMulti {
 				tmpQuery = tmpQuery.MustNot(elastic.NewTermsQuery(cur.Key, terms...))
 			} else {
