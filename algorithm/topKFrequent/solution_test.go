@@ -33,3 +33,10 @@ func TestTopKFrequent4(t *testing.T) {
 	logs.Info("demo: %v, kth: %v, expect: %v, res: %v", demo, kth, expect, TopKFrequent(demo, kth))
 
 }
+
+func TestTopKFrequentA(t *testing.T) {
+	demo := []int{1, 2}
+	kth := 2
+	expect := []int{1, 2}
+	logs.Info("demo: %v, kth: %v, expect: %v, res: %v", demo, kth, expect, TopKFrequentA(demo, kth))
+}
