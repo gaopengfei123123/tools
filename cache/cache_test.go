@@ -35,7 +35,22 @@ func TestDecode2(t *testing.T) {
 	bt, err := Encode(info)
 	t.Logf("bytes: %v err: %v", bt, err)
 
-	newMp := map[string]int{}
+	newMp := map[string]string{}
+	err = Decode(bt, &newMp)
+	t.Logf("v: %v,  err: %v", newMp, err)
+}
+
+type ErrT interface {
+	String()
+}
+
+func TestDecode3(t *testing.T) {
+	info := fmt.Errorf("xxxxx")
+
+	bt, err := Encode(info)
+	t.Logf("bytes: %v err: %v", bt, err)
+
+	var newMp error
 	err = Decode(bt, &newMp)
 	t.Logf("v: %v,  err: %v", newMp, err)
 }

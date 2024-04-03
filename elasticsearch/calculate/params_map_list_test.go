@@ -39,6 +39,7 @@ func TestParamsMapList_GenerateQuery3(t *testing.T) {
 		"operate_config_id":        1654,
 		"small_course_order":       []interface{}{SignMustNot, SignExist}, // 字段不存在
 		"intention.intention_type": []interface{}{1, 10},                  // 字段范围是 1<=x<=10
+		"customer_id":              []interface{}{1, 10, 123},
 	}
 
 	boolQuery := new(ParamsMapList).LoadConfig("", params).GenerateQuery()
