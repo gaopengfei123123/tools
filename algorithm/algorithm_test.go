@@ -85,26 +85,3 @@ func TestBuildHeap(t *testing.T) {
 	maxHeapify(demo, 0, heapSize)
 	logs.Info("after del 1: %v, size: %v", demo, heapSize)
 }
-
-func TestTopKFrequent(t *testing.T) {
-	demo := []int{1, 1, 1, 2, 2, 3}
-	kth := 2
-	expect := []int{1, 2}
-	logs.Info("demo: %v, kth: %v, expect: %v, res: %v", demo, kth, expect, TopKFrequent(demo, kth))
-
-	demo = []int{1}
-	kth = 1
-	expect = []int{1}
-	logs.Info("demo: %v, kth: %v, expect: %v, res: %v", demo, kth, expect, TopKFrequent(demo, kth))
-
-	demo = []int{-1, -1}
-	kth = 1
-	expect = []int{-1}
-	logs.Info("demo: %v, kth: %v, expect: %v, res: %v", demo, kth, expect, TopKFrequent(demo, kth))
-
-	demo = []int{1, 2}
-	kth = 2
-	expect = []int{1, 2}
-	logs.Info("demo: %v, kth: %v, expect: %v, res: %v", demo, kth, expect, TopKFrequent(demo, kth))
-
-}
