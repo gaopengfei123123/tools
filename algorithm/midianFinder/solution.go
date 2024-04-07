@@ -43,23 +43,12 @@ func (this *MedianFinder) AddNum(num int) {
 	}
 }
 
-//  1
-// 1 | 2
-// 1 2 | 3
-
 func (this *MedianFinder) FindMedian() float64 {
 	if this.LeftHp.Len() == this.RightHp.Len() {
 		return (float64(this.RightHp.Head()) + float64(this.LeftHp.Head())) / 2
 	}
 	return float64(this.LeftHp.Head())
 }
-
-/**
- * Your MedianFinder object will be instantiated and called as such:
- * obj := Constructor();
- * obj.AddNum(num);
- * param_2 := obj.FindMedian();
- */
 
 // MinHeap 最小堆
 type MinHeap []int
