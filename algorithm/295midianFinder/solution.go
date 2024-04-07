@@ -1,4 +1,4 @@
-package midianFinder
+package _95midianFinder
 
 import "container/heap"
 
