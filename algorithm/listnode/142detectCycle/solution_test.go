@@ -11,7 +11,7 @@ func TestCase(t *testing.T) {
 	NodeA := BuildNodeList(nodeA)
 
 	expect := true
-	logs.Info("nodeA: %v, expect: %v, res: %v", nodeA, expect, hasCycle(NodeA))
+	logs.Info("nodeA: %v, expect: %v, res: %v", nodeA, expect, detectCycle(NodeA))
 }
 
 func TestCase2(t *testing.T) {
@@ -20,7 +20,7 @@ func TestCase2(t *testing.T) {
 	NodeA := BuildNodeList(nodeA)
 
 	expect := false
-	logs.Info("nodeA: %v, expect: %v, res: %v", nodeA, expect, hasCycle(NodeA))
+	logs.Info("nodeA: %v, expect: %v, res: %v", nodeA, expect, detectCycle(NodeA))
 }
 
 func TestBuildNodeList(t *testing.T) {
