@@ -13,7 +13,7 @@ func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 	cursor := result
 	tmpVal := 0
 
-	for l1 != nil && l2 != nil {
+	for l1 != nil || l2 != nil {
 		unit, decade := addNode(l1, l2, tmpVal)
 		tmpVal = decade
 
@@ -23,25 +23,13 @@ func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
 		cursor.Next = tmp
 		cursor = cursor.Next
 
-		l1 = l1.Next
-		l2 = l2.Next
-	}
+		if l1 != nil {
+			l1 = l1.Next
+		}
 
-	// 只要其中有一个还有值, 那么继续相加
-	if l2 != nil {
-		l1 = l2
-	}
-
-	for l1 != nil {
-		unit, decade := addNode(l1, nil, tmpVal)
-
-		tmpVal = decade
-		tmp := new(ListNode)
-		tmp.Val = unit
-
-		cursor.Next = tmp
-		cursor = cursor.Next
-		l1 = l1.Next
+		if l2 != nil {
+			l2 = l2.Next
+		}
 	}
 
 	// 将最高位放到链表尾部
