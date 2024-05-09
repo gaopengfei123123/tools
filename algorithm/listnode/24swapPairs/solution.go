@@ -8,7 +8,8 @@ package _24swapPairs
  * }
  */
 
-/**
+/*
+*
 
 当前链表分解步骤如下如下:
 head(current) -> A -> B -> tail
@@ -16,19 +17,16 @@ node1 = current.Next       =>   A -> B -> tail
 node2 = current.Next.Next  =>   B -> tail
 current.Next = node2       =>   head(current)  -> B -> tail
 node1.Next = node2.Next    =>   A-> tail
-node2.Next = node1         =>   B -> A -> tail
+node2.Next = node1         =>   head(current) -> B -> A -> tail
 current = node1            =>   head -> B -> A (current) -> tail
 */
-
 func swapPairs(head *ListNode) *ListNode {
 	dummy := &ListNode{0, head}
 	current := dummy
 	for current.Next != nil && current.Next.Next != nil {
 		node1 := current.Next
 		node2 := current.Next.Next
-
 		current.Next = node2
-
 		node1.Next = node2.Next
 		node2.Next = node1
 		current = node1
