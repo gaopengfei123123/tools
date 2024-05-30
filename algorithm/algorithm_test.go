@@ -2,6 +2,9 @@ package algorithm
 
 import (
 	"github.com/astaxie/beego/logs"
+	"io"
+	"net/http"
+	"runtime"
 	"testing"
 )
 
@@ -84,4 +87,29 @@ func TestBuildHeap(t *testing.T) {
 	demo[0], demo[len(demo)-2] = demo[len(demo)-2], demo[0]
 	maxHeapify(demo, 0, heapSize)
 	logs.Info("after del 1: %v, size: %v", demo, heapSize)
+}
+
+func TestQuickSort(t *testing.T) {
+	arr := []int{5, 2, 1, 4, 3}
+
+	logs.Info("arr: %v", QuickSort(arr))
+}
+
+func TestQuickSort2(t *testing.T) {
+	arr := []int{6, 5, 2, 1, 4, 3, 7, 0}
+
+	logs.Info("arr: %v", QuickSort2(arr))
+}
+
+func TestQuickSort3(t *testing.T) {
+	wang := "https://www.baidu.com"
+
+	for i := 0; i < 6; i++ {
+		logs.Info("i: %v", i)
+		resp, _ := http.Get(wang)
+		_, _ = io.ReadAll(resp.Body)
+		logs.Info("resp: %s", resp)
+	}
+
+	logs.Info("goroutine: %v", runtime.NumGoroutine())
 }

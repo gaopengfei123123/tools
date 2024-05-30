@@ -180,3 +180,74 @@ func maxHeapify(a []int, i, heapSize int) {
 		maxHeapify(a, largest, heapSize)
 	}
 }
+
+func QuickSort(arr []int) []int {
+	if len(arr) < 2 {
+		return arr
+	}
+
+	pivot := arr[0]
+	left, right := 0, len(arr)-1
+
+	for i, v := range arr {
+		if v < pivot {
+			arr[i], arr[left] = arr[left], arr[i]
+			left++
+		}
+	}
+
+	arr[left], arr[right] = arr[right], arr[left]
+
+	QuickSort(arr[:left])
+	QuickSort(arr[left+1:])
+	return arr
+}
+
+func QuickSort2(arr []int) []int {
+	if len(arr) < 2 {
+		return arr
+	}
+
+	left, right := 0, len(arr)-1
+
+	mid := arr[right]
+
+	for i, v := range arr {
+		if v < mid {
+			arr[i], arr[left] = arr[left], arr[i]
+			left++
+		}
+	}
+
+	arr[left], arr[right] = arr[right], arr[left]
+
+	QuickSort2(arr[:left])
+	QuickSort2(arr[left+1:])
+	return arr
+}
+
+func QuickSort3(arr []int) []int {
+	if len(arr) < 2 {
+		return arr
+	}
+	left, right := 0, len(arr)-1
+	// 选择最后一个元素作为基准
+	pivot := arr[right]
+
+	// 将小于pivot的元素放到左边，大于pivot的元素放到右边
+	for i := range arr {
+		if arr[i] < pivot {
+			arr[i], arr[left] = arr[left], arr[i]
+			left++
+		}
+	}
+
+	// 将pivot放到它最终的位置上
+	arr[left], arr[right] = arr[right], arr[left]
+
+	// 递归地对左右两部分进行快速排序
+	QuickSort3(arr[:left])
+	QuickSort3(arr[left+1:])
+
+	return arr
+}

@@ -168,7 +168,7 @@ func interfaceToStr(f interface{}, v ...interface{}) (string, []interface{}) {
 
 // GenerageUniqueID 获取uniqueid
 func GenerageUniqueID(src string) (uid, salt string) {
-	uuid, _ := uuid.NewV4()
+	uuid := uuid.NewV4()
 	salt = uuid.String()[:32]
 	h := md5.New()
 	h.Write([]byte(src + salt))
