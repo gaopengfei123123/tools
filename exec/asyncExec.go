@@ -3,8 +3,6 @@ package exec
 import (
 	"context"
 	"fmt"
-	"github.com/astaxie/beego/logs"
-	"github.com/gaopengfei123123/tools"
 	"github.com/pkg/errors"
 	"reflect"
 	"time"
@@ -44,12 +42,13 @@ type CallTask struct {
 
 // CallBody 单个函数的请求体
 type CallBody struct {
-	Status   int           // 执行状态
-	Index    int           // 传入时的顺序
-	FuncName interface{}   // 要执行的函数本体
-	Params   []interface{} // 要传的函数参数, 需要类型和数量都保持一致
-	Result   []interface{} // 函数返回的所有结果(对应多参数返回)
-	Err      error         // 函数在 callBack 里调用时的错误
+	Status    int           // 执行状态
+	Index     int           // 传入时的顺序
+	FuncName  interface{}   // 要执行的函数本体
+	Params    []interface{} // 要传的函数参数, 需要类型和数量都保持一致
+	Result    []interface{} // 函数返回的所有结果(对应多参数返回)
+	ResultPtr []interface{} // 外部传入的时候, 需要传入指针, 用于将result 的内容通过指针返回去
+	Err       error         // 函数在 callBack 里调用时的错误
 }
 
 // GetResult 将返回结果以反射的方式赋值给传入参数
@@ -66,7 +65,12 @@ func (cb *CallBody) GetResult(returnItems ...interface{}) error {
 		return fmt.Errorf("func exec overtime, index: %v", cb.Index)
 	}
 
-	return tools.InterfaceToResult(cb.Result, returnItems...)
+	return InterfaceToResult(cb.Result, returnItems...)
+}
+
+// IsNew 判断是否是新的任务
+func (cb *CallBody) IsNew() bool {
+	return cb.Status == StatusWait
 }
 
 // Worker 工作线程
@@ -74,22 +78,18 @@ func Worker(ctx context.Context, jobs <-chan CallBody, result chan<- CallBody) {
 	// 如果执行超时, 则需要捕获 send on closed channel 的异常
 	defer func() {
 		if panicErr := recover(); panicErr != nil {
-			logs.Error("ctx index: %v, panicErr: %s", ctx.Value("workIndex"), panicErr)
+			fmt.Printf("Err: ctx index: %v, panicErr: %s", ctx.Value("workIndex"), panicErr)
 			return
 		}
 	}()
-
-	logs.Trace("start worker, ctx index: %v", ctx.Value("workIndex"))
 
 LOOP:
 	for {
 		select {
 		case <-ctx.Done():
-			logs.Trace("worker timeout stop, ctx index: %v", ctx.Value("workIndex"))
 			break LOOP
 		case curJob, ok := <-jobs:
 			if !ok {
-				logs.Trace("worker closed, ctx index: %v", ctx.Value("workIndex"))
 				break LOOP
 			}
 			funcRes, funErr := CallFunc(curJob)
@@ -148,6 +148,19 @@ func (task *CallTask) AddTask(job CallBody) *CallTask {
 	return task
 }
 
+// AddTasks 批量添加任务
+func (task *CallTask) AddTasks(jobs ...CallBody) *CallTask {
+	if len(jobs) == 0 {
+		return task
+	}
+
+	for _, job := range jobs {
+		task.AddTask(job)
+	}
+
+	return task
+}
+
 func (task *CallTask) BatchExec() error {
 	if len(task.TaskList) == 0 {
 		return nil
@@ -189,9 +202,17 @@ func (task *CallTask) BatchExec() error {
 		go Worker(childCtx, jobChan, resultChan)
 	}
 
+	// 当前实际任务运行数
+	taskNum := 0
 	// 将任务放入工作队列
 	for j := 0; j < len(task.TaskList); j++ {
 		cur := task.TaskList[j]
+		if cur.IsNew() == false {
+			// 防止重复执行
+			continue
+		}
+		taskNum++
+
 		cur.Index = j
 		jobChan <- cur
 	}
@@ -201,12 +222,17 @@ func (task *CallTask) BatchExec() error {
 	done := make(chan struct{}, 1)
 	defer close(done)
 
+	if taskNum == 0 {
+		// 没有新执行的任务, 直接返回
+		return nil
+	}
+
 	// 并行读取结果
 	go func(max int) {
 		// 如果执行超时, 则需要捕获 send on closed channel 的异常
 		defer func() {
 			if panicErr := recover(); panicErr != nil {
-				logs.Error("panicErr: %s", panicErr)
+				fmt.Printf("Err panicErr: %v", panicErr)
 				return
 			}
 		}()
@@ -214,23 +240,20 @@ func (task *CallTask) BatchExec() error {
 		for i := 0; i < max; i++ {
 			res, ok := <-resultChan
 			if !ok {
-				logs.Trace("chan is empty")
 				break
 			}
 			// 将结果返回给原位置
 			task.TaskList[res.Index] = res
 		}
 		done <- struct{}{}
-	}(len(task.TaskList))
+	}(taskNum)
 
 LOOP:
 	for {
 		select {
 		case <-done:
-			logs.Trace("finish")
 			break LOOP
 		case <-timeoutCtx.Done():
-			logs.Trace("timeout")
 			// 所有未执行/未返回结果的函数, 按超时处理
 			for i := range task.TaskList {
 				if task.TaskList[i].Status == StatusWait {
@@ -239,6 +262,34 @@ LOOP:
 			}
 			break LOOP
 		}
+	}
+
+	return nil
+}
+
+// BatchFetchResult 批量获取结果, 并将内容解析到传入的指针中
+// 这里需要注意一点, 因为传入的是resultPtr 是指针, 那么如果多个函数共用同一个指针会造成数据覆盖, 例如大部分函数返回的 error 类型
+func (task *CallTask) BatchFetchResult() error {
+	if len(task.TaskList) == 0 {
+		return nil
+	}
+	err := task.BatchExec()
+	if err != nil {
+		return fmt.Errorf("BatchExec err: %v", err)
+	}
+
+	errMsgArr := []string{}
+	for i := range task.TaskList {
+		cur := task.TaskList[i]
+		er := cur.GetResult(cur.ResultPtr...)
+		if er != nil {
+			msg := fmt.Sprintf("index: %d, msg: %s, FuncErr: %v \n", i, cur.Result, er)
+			errMsgArr = append(errMsgArr, msg)
+		}
+	}
+
+	if len(errMsgArr) > 0 {
+		return errors.New(fmt.Sprintf("BatchFetchResult err: %v", errMsgArr))
 	}
 
 	return nil

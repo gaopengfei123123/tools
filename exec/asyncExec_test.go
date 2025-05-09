@@ -2,7 +2,6 @@ package exec
 
 import (
 	"fmt"
-	"github.com/astaxie/beego/logs"
 	"testing"
 	"time"
 )
@@ -22,9 +21,9 @@ func TestCallTask_BatchExec(t *testing.T) {
 		task.AddTask(func1)
 	}
 
-	logs.Trace("task: %#+v", task)
+	fmt.Printf("task: %#+v", task)
 	task.BatchExec()
-	logs.Trace("task: %#+v", task)
+	fmt.Printf("task: %#+v", task)
 }
 
 // 多协程执行示例
@@ -42,14 +41,14 @@ func TestCallTask_BatchExec2(t *testing.T) {
 		task.AddTask(func1)
 	}
 
-	logs.Trace("task: %#+v", task)
+	fmt.Printf("task: %#+v", task)
 	task.BatchExec()
-	logs.Trace("task: %#+v", task)
+	fmt.Printf("task: %#+v", task)
 
 	for i := range task.TaskList {
 		var msg string
 		err := task.TaskList[i].GetResult(&msg)
-		logs.Trace("func result => index: %d, msg: %s, FuncErr: %v", i, msg, err)
+		fmt.Printf("func result => index: %d, msg: %s, FuncErr: %v", i, msg, err)
 	}
 }
 
@@ -77,13 +76,14 @@ func TestCallTask_BatchExec3(t *testing.T) {
 	}
 
 	task := &CallTask{}
-	task.MaxTime = time.Second * 2 // 设置最大超时时间 2s
+	task.MaxTime = time.Second * 5 // 设置最大超时时间 2s
+	task.WorkNum = 5
 	task.AddTask(func1).AddTask(func2).AddTask(func3)
 
 	funcErr := task.BatchExec()
 
 	if funcErr != nil {
-		logs.Error("batchExecErr: %v", funcErr)
+		fmt.Printf("batchExecErr: %v", funcErr)
 		return
 	}
 
@@ -93,20 +93,74 @@ func TestCallTask_BatchExec3(t *testing.T) {
 			// DemoFunc 的返回值
 			var msg string
 			execErr := curResult.GetResult(&msg)
-			logs.Trace("exec index: %d, execErr: %v res: %#+v", curResult.Index, execErr, msg)
+			fmt.Printf("\n exec index: %d, execErr: %v res: %#+v \n", curResult.Index, execErr, msg)
 		} else {
 			var res map[string]string
 			var err error
 			execErr := curResult.GetResult(&res, &err)
-			logs.Trace("exec index: %d, execErr: %v res: %#+v, %#+v", curResult.Index, execErr, res, err)
+			fmt.Printf("\n exec index: %d, execErr: %v res: %#+v, %#+v \n", curResult.Index, execErr, res, err)
 		}
 	}
 
 }
 
+// 批量执行, 并且获取结果
+func TestCallTask_BatchFetchResult(t *testing.T) {
+	var funcMsg1, funcMsg2 string
+	var funcRes3 map[string]string
+	var funcErr3 error
+
+	func1 := CallBody{
+		FuncName: DemoFunc,
+		Params: []interface{}{
+			"word", 3,
+		},
+		ResultPtr: []interface{}{
+			&funcMsg1,
+		},
+	}
+
+	func2 := CallBody{
+		FuncName: DemoFunc,
+		Params: []interface{}{
+			"GPF", 1,
+		},
+		ResultPtr: []interface{}{
+			&funcMsg2,
+		},
+	}
+
+	func3 := CallBody{
+		FuncName: DemoFunc2,
+		Params: []interface{}{
+			"XXX", "YYY", "ZZZ",
+		},
+		ResultPtr: []interface{}{
+			&funcRes3, &funcErr3,
+		},
+	}
+
+	task := &CallTask{}
+	task.MaxTime = time.Second * 5 // 设置最大超时时间 2s
+	task.WorkNum = 5
+	task.AddTask(func1).AddTask(func2).AddTask(func3)
+
+	funcErr := task.BatchFetchResult()
+
+	if funcErr != nil {
+		fmt.Printf("BatchFetchResult: %v", funcErr)
+		return
+	}
+
+	fmt.Printf("func1: msg: %v \n", funcMsg1)
+	fmt.Printf("func2: msg: %v \n", funcMsg2)
+	fmt.Printf("func3: res: %#+v, err: %#+v \n", funcRes3, funcErr3)
+
+}
+
 func DemoFunc(msg string, tt int) string {
 	time.Sleep(time.Second * time.Duration(tt))
-	logs.Debug("DemoFunc: hello %s, sleep %v s", msg, time.Second*time.Duration(tt))
+	fmt.Printf("DemoFunc: hello %s, sleep %v s", msg, time.Second*time.Duration(tt))
 	return "hello " + msg
 }
 
@@ -122,9 +176,9 @@ func TestFuncWithTimeout(t *testing.T) {
 	var msg string
 
 	err := FuncWithTimeout(time.Second*2, DemoFunc, "hello world", 1).GetResult(&msg)
-	logs.Info("err: %v, result: %v", err, msg)
+	fmt.Printf("err: %v, result: %v", err, msg)
 
 	var msg2 string
 	err = FuncWithTimeout(time.Second*2, DemoFunc, "hello world", 3).GetResult(&msg2)
-	logs.Info("err: %v, result: %v", err, msg2)
+	fmt.Printf("err: %v, result: %v", err, msg2)
 }
